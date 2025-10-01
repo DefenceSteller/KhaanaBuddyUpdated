@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "215274115316",
+    "project_id": "khaanabuddy-9fc4d",
+    "storage_bucket": "khaanabuddy-9fc4d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:215274115316:android:decc8555644653e13d0ea1",
+        "android_client_info": {
+          "package_name": "com.example.khaanabuddy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKWosQNSFqnbub1m6EdjrHE_XFOv8-ckA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
