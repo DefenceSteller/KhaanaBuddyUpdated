@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart';
-// import '../providers/theme_provider.dart';
-
-
-
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
-
-
 
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController ingredientController = TextEditingController();
@@ -20,14 +14,11 @@ class _HomeScreenState extends State<HomeScreen> {
     "Italian", "Chinese", "Indian", "Mexican", "American", "Thai", "Pakistani", "English", "Mughlai",
   ];
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       appBar: AppBar(title: Text("AI Chef")),
       body: Padding(
-        
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,15 +45,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Spacer(),
 
+            // ✅ Logout Button (Firebase)
             ElevatedButton.icon(
-                onPressed: () async {
-                  await AuthService().signOut();
-                  Navigator.pushReplacementNamed(context, '/');
-                },
-                icon: Icon(Icons.logout),
-                label: Text("Logout"),
-              ),
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushReplacementNamed(context, '/');
+              },
+              icon: Icon(Icons.logout),
+              label: Text("Logout"),
+            ),
 
+            SizedBox(height: 10),
+
+            // ✅ Find Recipes Button
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(
@@ -77,11 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text("Find Recipes"),
               style: ElevatedButton.styleFrom(minimumSize: Size.fromHeight(50)),
             )
-            
-            
           ],
-          
-
         ),
       ),
     );
