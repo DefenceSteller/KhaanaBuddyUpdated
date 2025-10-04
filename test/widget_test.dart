@@ -5,7 +5,7 @@ import 'package:khaanabuddy/app.dart';
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our simple test app and trigger a frame.
-    await tester.pumpWidget( MyApp());
+    await tester.pumpWidget(const MyApp());
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
@@ -24,7 +24,7 @@ void main() {
 /// A minimal app used only for this unit test.
 /// Using this avoids needing `MyApp` from your real app.
 class _TestApp extends StatefulWidget {
-  const _TestApp({super.key});
+  const _TestApp();
 
   @override
   State<_TestApp> createState() => _TestAppState();

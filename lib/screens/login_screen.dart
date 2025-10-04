@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
-
-  LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -73,18 +78,8 @@ class LoginScreen extends StatelessWidget {
 
             // Login Button
             ElevatedButton(
-              onPressed: () async {
-                try {
-                  await AuthService().signIn(email.text, password.text);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomeScreen()),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Login failed")),
-                  );
-                }
+              onPressed: () {
+                _login();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
@@ -117,5 +112,21 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _login() async {
+    try {
+      await AuthService().signIn(email.text, password.text);
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Login failed")),
+      );
+    }
   }
 }

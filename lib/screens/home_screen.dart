@@ -110,9 +110,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // 🔸 Logout Button
             OutlinedButton.icon(
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacementNamed(context, '/');
+              onPressed: () {
+                _logout();
               },
               icon: const Icon(Icons.logout, color: Colors.orange),
               label: const Text(
@@ -131,5 +130,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void _logout() async {
+    await FirebaseAuth.instance.signOut();
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, '/');
   }
 }

@@ -14,12 +14,14 @@ void main() {
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -32,12 +34,12 @@ class MyApp extends StatelessWidget {
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       initialRoute: '/',
       routes: {
-        '/': (context) => LoginScreen(),
-        '/signup': (context) => SignupScreen(),
-        '/home': (context) => HomeScreen(),
-        '/recipe': (context) => RecipeDetail(),
-        // '/saved': (context) => SavedScreen(),
-        '/history': (context) => HistoryScreen(),
+        '/': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/recipe': (context) => const RecipeDetail(),
+        // '/saved': (context) => const SavedScreen(),
+        '/history': (context) => const HistoryScreen(),
       },
     );
   }

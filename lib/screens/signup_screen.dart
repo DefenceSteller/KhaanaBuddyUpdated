@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
+
+  @override
+  State<SignupScreen> createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
-
-  SignupScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -73,18 +78,8 @@ class SignupScreen extends StatelessWidget {
 
             // Signup Button
             ElevatedButton(
-              onPressed: () async {
-                try {
-                  await AuthService().signUp(email.text, password.text);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomeScreen()),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Signup failed")),
-                  );
-                }
+              onPressed: () {
+                _signup();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
@@ -118,5 +113,23 @@ class SignupScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _signup() async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    
+    try {
+      await AuthService().signUp(email.text, password.text);
+      if (!mounted) return;
+      navigator.pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text("Signup failed")),
+      );
+    }
   }
 }
