@@ -3,7 +3,7 @@ import 'package:khaanabuddy/services/ai_service.dart';
 import 'package:khaanabuddy/services/firestore_service.dart';
 import 'package:khaanabuddy/voice/voice_service.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:khaanabuddy/services/youtube_service.dart'; // defines class YoutubeService
+import 'package:khaanabuddy/services/youtube_service.dart';
 
 class RecipeDetail extends StatefulWidget {
   const RecipeDetail({super.key});
@@ -38,8 +38,8 @@ class _RecipeDetailState extends State<RecipeDetail> {
   Future<void> _initializeContent() async {
     await _loadRecipe(ingredients, cuisine);
 
-    // 🔧 Use YoutubeService (no capital T)
-    final videoId = await YoutubeService.getFirstVideoId("How to make $cuisine recipe");
+    final videoId =
+        await YoutubeService.getFirstVideoId("How to make $cuisine recipe");
     if (!mounted) return;
 
     if (videoId != null) {
@@ -102,26 +102,70 @@ class _RecipeDetailState extends State<RecipeDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Recipe details")),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.orange,
+        title: const Text(
+          "Recipe Details",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 2,
+      ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: Colors.orange),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(recipe, style: const TextStyle(fontSize: 16)),
-                  const SizedBox(height: 20),
-                  if (_videoId != null && _youtubeController != null)
-                    YoutubePlayer(
-                      controller: _youtubeController!,
-                      showVideoProgressIndicator: true,
+                  Card(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    color: Colors.orange.shade50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        recipe,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          height: 1.5,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (_videoId != null && _youtubeController != null) ...[
+                    const Text(
+                      "Watch Recipe Tutorial:",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: YoutubePlayer(
+                        controller: _youtubeController!,
+                        showVideoProgressIndicator: true,
+                        progressIndicatorColor: Colors.orange,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _saveRecipe,
+        backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.history),
         label: const Text("Save to history"),
       ),
