@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'providers/theme_provider.dart';
 import 'themes/theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/recipe_detail.dart';
-// import 'screens/saved_screen.dart';
 import 'screens/history_screen.dart';
-
-void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
-      child: const MyApp(),
-    ),
-  );
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: const AppContent(),
+    );
+  }
+}
+
+class AppContent extends StatelessWidget {
+  const AppContent({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +33,12 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      initialRoute: '/',
+      initialRoute: '/signup', // ← CHANGE THIS TO START WITH SIGNUP
       routes: {
         '/': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/home': (context) => const HomeScreen(),
         '/recipe': (context) => const RecipeDetail(),
-        // '/saved': (context) => const SavedScreen(),
         '/history': (context) => const HistoryScreen(),
       },
     );
