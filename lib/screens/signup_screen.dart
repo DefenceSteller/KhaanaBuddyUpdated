@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // ADD THIS IMPORT
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
 
@@ -161,7 +161,6 @@ class _SignupScreenState extends State<SignupScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Signup failed: $e")),
       );
-      print('Detailed error: $e');
     } finally {
       if (mounted) {
         setState(() {

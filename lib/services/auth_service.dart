@@ -9,8 +9,6 @@ class AuthService {
 
   Future<User?> signUp(String email, String password) async {
     try {
-      print('Attempting to sign up: $email');
-      
       // 1. Create user with Firebase Auth
       final result = await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
@@ -25,12 +23,10 @@ class AuthService {
           'createdAt': ServerValue.timestamp,
           'uid': result.user!.uid,
         });
-        print('User data saved to Realtime Database');
       }
       
       return result.user;
     } catch (e) {
-      print('Signup error: $e');
       rethrow;
     }
   }
