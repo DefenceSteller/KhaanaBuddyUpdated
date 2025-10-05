@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // ADD THIS IMPORT
 import '../services/auth_service.dart';
 import 'home_screen.dart';
 
@@ -12,6 +13,7 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -78,9 +80,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
             // Signup Button
             ElevatedButton(
-              onPressed: () {
-                _signup();
-              },
+              onPressed: _isLoading ? null : _signup,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
@@ -89,7 +89,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text("Sign Up", style: TextStyle(fontSize: 16)),
+              child: _isLoading 
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text("Sign Up", style: TextStyle(fontSize: 16)),
             ),
 
             const SizedBox(height: 15),
@@ -97,7 +99,7 @@ class _SignupScreenState extends State<SignupScreen> {
             // Redirect to Login
             Center(
               child: TextButton(
-                onPressed: () {
+                onPressed: _isLoading ? null : () {
                   Navigator.pushNamed(context, '/');
                 },
                 child: const Text(
@@ -116,20 +118,56 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _signup() async {
-    final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    
-    try {
-      await AuthService().signUp(email.text, password.text);
-      if (!mounted) return;
-      navigator.pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+    // Basic validation
+    if (email.text.isEmpty || password.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill all fields")),
       );
+      return;
+    }
+
+    if (password.text.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Password must be at least 6 characters")),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      User? user = await AuthService().signUp(email.text, password.text);
+      
+      if (!mounted) return;
+      
+      if (user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Signup successful!")),
+        );
+        
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Signup failed: User is null")),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
-      messenger.showSnackBar(
-        const SnackBar(content: Text("Signup failed")),
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Signup failed: $e")),
       );
+      print('Detailed error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 }
