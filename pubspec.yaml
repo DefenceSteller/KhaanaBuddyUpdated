@@ -14,8 +14,7 @@ dependencies:
   google_generative_ai: ^0.4.7
   firebase_core: ^2.32.0
   firebase_auth: ^4.15.3
-  firebase_database: ^10.3.4  # ADD THIS LINE
-  cloud_firestore: ^4.12.2   # You can remove this if not using Firestore
+  cloud_firestore: ^4.12.2  # ADD THIS (remove firebase_database)
   shared_preferences: ^2.2.2
   youtube_player_flutter: ^8.1.1
   flutter_tts: ^3.6.3

@@ -19,18 +19,19 @@ class _RecipeDetailState extends State<RecipeDetail> {
   YoutubePlayerController? _youtubeController;
   String? _videoId;
 
-  late String ingredients;
-  late String cuisine;
-  late String userId;
+  String ingredients = "";
+  String cuisine = "";
+  String userId = "guest";
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {};
 
-    ingredients = args["ingredients"];
-    cuisine = args["cuisine"];
-    userId = args["userId"];
+    ingredients = args["ingredients"] ?? "";
+    cuisine = args["cuisine"] ?? "";
+    userId = args["userId"] ?? "guest";
 
     _initializeContent();
   }
@@ -110,7 +111,7 @@ class _RecipeDetailState extends State<RecipeDetail> {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 2,
+        elevation: 3,
       ),
       body: isLoading
           ? const Center(
@@ -121,6 +122,7 @@ class _RecipeDetailState extends State<RecipeDetail> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 🧡 Recipe Card
                   Card(
                     elevation: 3,
                     shape: RoundedRectangleBorder(
@@ -139,7 +141,10 @@ class _RecipeDetailState extends State<RecipeDetail> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 20),
+
+                  // 🎥 YouTube Video
                   if (_videoId != null && _youtubeController != null) ...[
                     const Text(
                       "Watch Recipe Tutorial:",
@@ -162,6 +167,8 @@ class _RecipeDetailState extends State<RecipeDetail> {
                 ],
               ),
             ),
+
+      // 🧡 Save Button
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _saveRecipe,
         backgroundColor: Colors.orange,

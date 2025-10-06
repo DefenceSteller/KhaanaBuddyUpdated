@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:khaanabuddy/screens/home_screen.dart';
+import 'package:khaanabuddy/screens/recipe_detail.dart';
+import 'package:khaanabuddy/screens/history_screen.dart';
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
 import 'themes/theme.dart';
-import 'screens/home_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/signup_screen.dart';
-import 'screens/recipe_detail.dart';
-import 'screens/history_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -28,16 +26,27 @@ class AppContent extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
-      title: 'AI Chef',
+      title: 'KhaanaBuddy',
       debugShowCheckedModeBanner: false,
-      theme: lightTheme,
+
+      // 🟠 Theme setup
+      theme: lightTheme.copyWith(
+        primaryColor: Colors.orange,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.orange,
+          foregroundColor: Colors.white,
+        ),
+        scaffoldBackgroundColor: Colors.white,
+      ),
       darkTheme: darkTheme,
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      initialRoute: '/signup', // ← CHANGE THIS TO START WITH SIGNUP
+
+      // 🏁 Starting page
+      initialRoute: '/home',
+
+      // 🧭 All routes
       routes: {
-        '/': (context) => const LoginScreen(),
-        '/signup': (context) => const SignupScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/home': (context) => HomeScreen(),
         '/recipe': (context) => const RecipeDetail(),
         '/history': (context) => const HistoryScreen(),
       },
