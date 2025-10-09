@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
 
@@ -12,6 +14,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
+
+  bool _isLoading = false;
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +45,8 @@ class _LoginScreenState extends State<LoginScreen> {
             // Email Input
             TextField(
               controller: email,
+
+              keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 labelText: 'Email',
                 prefixIcon: const Icon(Icons.email, color: Colors.orange),
@@ -77,26 +84,38 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 30),
 
             // Login Button
-            ElevatedButton(
-              onPressed: () {
-                _login();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _login,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text("Login", style: TextStyle(fontSize: 16)),
               ),
-              child: const Text("Login", style: TextStyle(fontSize: 16)),
             ),
             const SizedBox(height: 15),
 
             // Signup Redirect
             Center(
               child: TextButton(
-                onPressed: () {
+
+                onPressed: _isLoading ? null : () {
                   Navigator.pushNamed(context, '/signup');
                 },
                 child: const Text(
@@ -114,19 +133,109 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _login() async {
-    try {
-      await AuthService().signIn(email.text, password.text);
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    } catch (e) {
-      if (!mounted) return;
+
+ Future<void> _login() async {
+  // Basic validation
+  if (email.text.isEmpty || password.text.isEmpty) {
+    _showError("Please fill all fields");
+    return;
+  }
+
+  if (!email.text.contains('@')) {
+    _showError("Please enter a valid email address");
+    return;
+  }
+
+  setState(() {
+    _isLoading = true;
+  });
+
+  try {
+    User? user = await _authService.signIn(email.text, password.text);
+    
+    if (!mounted) return;
+    
+    if (user != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Login failed")),
+        const SnackBar(
+          content: Text("Login successful!"),
+          backgroundColor: Colors.green,
+        ),
       );
+      
+      // Use the navigation method that worked
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false,
+      );
+    } else {
+      _showError("Login failed - please try again");
     }
+  } on FirebaseAuthException catch (e) {
+    if (!mounted) return;
+    
+    String errorMessage = "Login failed";
+    switch (e.code) {
+      case 'user-not-found':
+        errorMessage = "No user found with this email";
+        break;
+      case 'wrong-password':
+        errorMessage = "Incorrect password";
+        break;
+      case 'invalid-email':
+        errorMessage = "Please enter a valid email address";
+        break;
+      case 'user-disabled':
+        errorMessage = "This account has been disabled";
+        break;
+      case 'too-many-requests':
+        errorMessage = "Too many attempts. Try again later";
+        break;
+      default:
+        errorMessage = "Login failed: ${e.message}";
+    }
+    
+    _showError(errorMessage);
+  } catch (e) {
+    if (!mounted) return;
+    
+    // Handle Pigeon error
+    if (e.toString().contains('PigeonUserDetails') || e.toString().contains('List<Object?>')) {
+      await Future.delayed(const Duration(seconds: 1));
+      final currentUser = FirebaseAuth.instance.currentUser;
+      
+      if (currentUser != null && currentUser.email == email.text.trim()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Login successful!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
+        return;
+      } else {
+        _showError("Login failed - please try again");
+      }
+    } else {
+      _showError("An unexpected error occurred: $e");
+    }
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+}
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 }

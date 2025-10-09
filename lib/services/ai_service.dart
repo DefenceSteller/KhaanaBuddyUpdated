@@ -2,12 +2,14 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 
 class AIService {
   // ✅ Replace with your verified Gemini API key
-  static const String apiKey = "AIzaSyAkv-Ugat2ZhkBygBJM-PzN7mKRSG12XFQ";
+
+  static const String apiKey = "AIzaSyDVyZ7YZ6QIswgvTXZNDR2ISbcilBGRRhY";
 
   static Future<String> getRecipe(String ingredients, String cuisine) async {
     // Use a model that exists in your key's model list
     final model = GenerativeModel(
-      model: 'gemini-2.5-pro-preview-03-25', // ✅ from your verified JSON
+
+      model: 'gemini-2.5-pro', // ✅ from your verified JSON
       apiKey: apiKey,
     );
 

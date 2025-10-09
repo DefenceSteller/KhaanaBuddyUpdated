@@ -1,47 +1,49 @@
 plugins {
     id("com.android.application")
-    // START: FlutterFire Configuration
+
     id("com.google.gms.google-services")
-    // END: FlutterFire Configuration
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+>>>>>>> 04c21b4 (Initial commit: KhaanaBuddy Flutter app)
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
     namespace = "com.example.khaanabuddy"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
+    ndkVersion = "27.0.12077973"
+    compileSdk = 35  // Update to 34
+    
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17  // Update to 17
+        targetCompatibility = JavaVersion.VERSION_17  // Update to 17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()  // Update to 17
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.khaanabuddy"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdk = 21  // Set explicit version
+        targetSdk = 35  // Update to 34
+        versionCode = 1
+        versionName = "1.0.0"
+>>>>>>> 04c21b4 (Initial commit: KhaanaBuddy Flutter app)
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+
             signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = true
+            isShrinkResources = true
+>>>>>>> 04c21b4 (Initial commit: KhaanaBuddy Flutter app)
         }
     }
 }
 
 flutter {
     source = "../.."
+
 }
+>>>>>>> 04c21b4 (Initial commit: KhaanaBuddy Flutter app)

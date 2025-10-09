@@ -5,6 +5,12 @@ import 'package:khaanabuddy/screens/history_screen.dart';
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
 import 'themes/theme.dart';
+import 'package:khaanabuddy/screens/login_screen.dart';
+import 'package:khaanabuddy/screens/signup_screen.dart';
+import 'package:provider/provider.dart';
+import 'providers/theme_provider.dart';
+import 'themes/theme.dart';
+import 'AuthWrapper.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -41,15 +47,14 @@ class AppContent extends StatelessWidget {
       darkTheme: darkTheme,
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
 
-      // 🏁 Starting page
-      initialRoute: '/home',
-
-      // 🧭 All routes
-      routes: {
-        '/home': (context) => HomeScreen(),
-        '/recipe': (context) => const RecipeDetail(),
-        '/history': (context) => const HistoryScreen(),
-      },
+home: const LoginScreen(),
+routes: {
+  '/login': (context) => const LoginScreen(),
+  '/signup': (context) => const SignupScreen(),
+  '/home': (context) => const HomeScreen(),
+  '/recipe': (context) => const RecipeDetail(),
+  '/history': (context) => const HistoryScreen(),
+},
     );
   }
 }

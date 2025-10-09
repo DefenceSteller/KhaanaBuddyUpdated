@@ -10,7 +10,8 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  final String userId = "temp_user"; // 🔑 Replace with Firebase Auth UID later
+
+  final String userId = "guest"; // ✅ Fix: matches your Firestore path
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator(color: Colors.orange));
+
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.orange),
+            );
           }
 
           final docs = snapshot.data?.docs ?? [];
@@ -75,7 +79,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.orange),
+
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 18,
+                    color: Colors.orange,
+                  ),
                   onTap: () {
                     Navigator.pushNamed(
                       context,

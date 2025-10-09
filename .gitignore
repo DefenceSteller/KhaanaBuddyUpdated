@@ -1,0 +1,54 @@
+﻿# Android
+**/android/**/build/
+**/android/.gradle/
+**/android/**/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/**/flutter_build.log
+
+# iOS
+**/ios/**/build/
+**/ios/**/.symlinks/
+**/ios/**/Flutter/App.framework/
+**/ios/**/Flutter/Flutter.framework/
+**/ios/**/Flutter/Flutter.podspec
+**/ios/**/Flutter/Generated.xcconfig
+**/ios/**/ServiceDefinitions.json
+**/ios/**/Runner/GeneratedPluginRegistrant.*
+
+# Build
+build/
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+.pubignore
+
+# Miscellaneous
+*.iml
+*.iws
+*.ipr
+*.swp
+.DS_Store
+*.o
+*.so
+*.apk
+*.dll
+*.exe
+*.lock
+*.log
+*.json
+*.sqlite
+*.sqlite3
+/thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.sw?
+*.tmproj
+*.sublime-*
+
+# Flutter
+.flutter-plugins
+.flutter-plugins-dependencies
+**/Flutter/.last_build_id

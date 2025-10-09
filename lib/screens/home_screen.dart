@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'history_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -25,6 +27,19 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
         elevation: 0,
+
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: "View Saved Recipes",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HistoryScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -81,7 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            const Spacer(),
+
+            const Spacer(flex: 2),
 
             // 🔸 Find Recipes Button
             ElevatedButton(
@@ -106,17 +122,24 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text("Find Recipes", style: TextStyle(fontSize: 16)),
             ),
 
-            const SizedBox(height: 12),
 
-            // 🔸 Logout Button
+            const SizedBox(height: 15),
+
+            // 🔸 View Saved Recipes Button (replaces Logout)
             OutlinedButton.icon(
               onPressed: () {
-                _logout();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HistoryScreen()),
+                );
               },
-              icon: const Icon(Icons.logout, color: Colors.orange),
+              icon: const Icon(Icons.bookmark, color: Colors.orange),
               label: const Text(
-                "Logout",
-                style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                "View Saved Recipes",
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
@@ -126,15 +149,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+
+
+            const Spacer(flex: 3),
           ],
         ),
       ),
     );
   }
 
-  void _logout() async {
-    await FirebaseAuth.instance.signOut();
-    if (!mounted) return;
-    Navigator.pushReplacementNamed(context, '/');
-  }
-}
+}     
