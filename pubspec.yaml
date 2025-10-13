@@ -35,6 +35,9 @@ dependencies:
 
 =======
   flutter_inappwebview: ^6.0.0
+  firebase_storage: ^11.6.5
+  image_picker: ^1.1.2
+  
 
 # ✅ Add this section to fix flutter_inappwebview namespace issue
 >>>>>>> 04c21b4 (Initial commit: KhaanaBuddy Flutter app)
@@ -46,3 +49,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - "lib/assets/KhaanaBuddy_logo.png"

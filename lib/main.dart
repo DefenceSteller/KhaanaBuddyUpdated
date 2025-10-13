@@ -2,8 +2,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:khaanabuddy/screens/signup_screen.dart';
-import 'screens/login_screen.dart'; // Correct import path
+import 'app.dart'; // Import app.dart instead of login_screen.dart
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,25 +17,5 @@ void main() async {
   }
 
 
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'KhaanaBuddy',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: Colors.orange,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.orange,
-          foregroundColor: Colors.white,
-        ),
-      ),
-      home: const LoginScreen(), // Directly use LoginScreen
-    );
-  }
+  runApp(const MyApp()); // This MyApp comes from app.dart
 }

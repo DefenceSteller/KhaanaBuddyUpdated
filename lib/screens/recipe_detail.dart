@@ -4,9 +4,18 @@ import 'package:khaanabuddy/services/firestore_service.dart';
 import 'package:khaanabuddy/voice/voice_service.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:khaanabuddy/services/youtube_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RecipeDetail extends StatefulWidget {
-  const RecipeDetail({super.key});
+  final String ingredients;
+  final String cuisine;
+
+  const RecipeDetail({
+    super.key,
+    required this.ingredients,
+    required this.cuisine,
+  });
 
   @override
   State<RecipeDetail> createState() => _RecipeDetailState();
@@ -21,20 +30,13 @@ class _RecipeDetailState extends State<RecipeDetail> {
   bool _isVideoLoading = false;
   bool _videoLoadFailed = false;
 
-  String ingredients = "";
-  String cuisine = "";
-  String userId = "guest";
-
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {};
 
-    ingredients = args["ingredients"] ?? "";
-    cuisine = args["cuisine"] ?? "";
-    userId = args["userId"] ?? "guest";
-    _loadRecipe(ingredients, cuisine);
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadRecipe(widget.ingredients, widget.cuisine);
+    });
   }
 
   Future<void> _loadRecipe(String ingredients, String cuisine) async {
@@ -49,70 +51,32 @@ class _RecipeDetailState extends State<RecipeDetail> {
         _videoLoadFailed = false;
       });
 
-      // ✅ Extract better recipe information for YouTube search
       final recipeInfo = _extractRecipeInfo(result);
-      
-      // Create more specific search query
-      String searchQuery;
-      if (recipeInfo['dishName'] != null && recipeInfo['cuisine'] != null) {
-        searchQuery = "${recipeInfo['dishName']} ${recipeInfo['cuisine']} recipe";
-      } else if (recipeInfo['dishName'] != null) {
-        searchQuery = "${recipeInfo['dishName']} recipe";
-      } else {
-        // Fallback to original method
-        final titleLine = recipe.split('\n').first.trim();
-        searchQuery = "$titleLine recipe tutorial";
-      }
+      String searchQuery =
+          "${recipeInfo['dishName'] ?? ingredients} ${cuisine} recipe";
 
-      print("🔍 Searching YouTube for: $searchQuery");
-
-      // ✅ Fetch related YouTube video
       final videoId = await YoutubeService.getFirstVideoId(searchQuery);
 
-      if (videoId != null && mounted) {
-        // Dispose previous controller if exists
+      if (!mounted) return;
+
+      if (videoId != null) {
         _youtubeController?.dispose();
-        
-        // Create new controller
         _youtubeController = YoutubePlayerController(
           initialVideoId: videoId,
-          flags: const YoutubePlayerFlags(
-            autoPlay: false,
-            mute: false,
-            enableCaption: false,
-            forceHD: false,
-          ),
+          flags: const YoutubePlayerFlags(autoPlay: false),
         );
-
-        // Add listener to track video state
-        _youtubeController!.addListener(() {
-          if (_youtubeController!.value.hasError && mounted) {
-            setState(() {
-              _videoLoadFailed = true;
-              _isVideoLoading = false;
-            });
-          }
+        setState(() {
+          _videoId = videoId;
+          _isVideoLoading = false;
         });
-
-        // Small delay to ensure proper initialization
-        await Future.delayed(const Duration(milliseconds: 500));
-
-        if (mounted) {
-          setState(() {
-            _videoId = videoId;
-            _isVideoLoading = false;
-          });
-        }
       } else {
-        if (mounted) {
-          setState(() {
-            _isVideoLoading = false;
-            _videoLoadFailed = true;
-          });
-        }
+        setState(() {
+          _videoLoadFailed = true;
+          _isVideoLoading = false;
+        });
       }
 
-      VoiceService().speak("Here's a recipe for you.");
+      VoiceService().speak("Here’s a recipe for you.");
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -122,104 +86,95 @@ class _RecipeDetailState extends State<RecipeDetail> {
         _videoLoadFailed = true;
       });
     } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   Map<String, String> _extractRecipeInfo(String recipe) {
     final lines = recipe.split('\n');
-    final Map<String, String> info = {};
-    
-    // Extract dish name from first line
-    if (lines.isNotEmpty) {
-      String firstLine = lines.first.trim();
-      // Remove common prefixes
-      firstLine = firstLine.replaceAll(RegExp(r'^Recipe for|^How to make|^[\d\.\-\*]+\s*', caseSensitive: false), '');
-      info['dishName'] = firstLine;
-    }
-    
-    // Look for cuisine type in the recipe
-    final cuisineKeywords = ['cuisine', 'style', 'type', 'traditional', 'authentic'];
-    for (String line in lines) {
-      final lowerLine = line.toLowerCase();
-      for (String keyword in cuisineKeywords) {
-        if (lowerLine.contains(keyword)) {
-          // Extract potential cuisine info
-          info['cuisine'] = line;
-          break;
-        }
-      }
-      if (info.containsKey('cuisine')) break;
-    }
-    
+    final info = <String, String>{};
+    if (lines.isNotEmpty) info['dishName'] = lines.first.replaceAll('#', '').trim();
     return info;
-  }
-
-  Future<void> _retryVideo() async {
-    if (_videoId == null) return;
-    
-    setState(() {
-      _isVideoLoading = true;
-      _videoLoadFailed = false;
-    });
-
-    try {
-      // Recreate the controller
-      _youtubeController?.dispose();
-      
-      _youtubeController = YoutubePlayerController(
-        initialVideoId: _videoId!,
-        flags: const YoutubePlayerFlags(
-          autoPlay: false,
-          mute: false,
-          enableCaption: false,
-        ),
-      );
-
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      if (mounted) {
-        setState(() {
-          _isVideoLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isVideoLoading = false;
-          _videoLoadFailed = true;
-        });
-      }
-    }
   }
 
   Future<void> _saveRecipe() async {
     try {
 
-      // Extract a better title for saving
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
       final recipeInfo = _extractRecipeInfo(recipe);
       final title = recipeInfo['dishName'] ?? "Generated Recipe";
-      
-      await FirestoreService().saveRecipe(
-        userId: userId,
-        title: title,
-        ingredients: ingredients,
-        cuisine: cuisine,
-        fullText: recipe,
-        isFavorite: false,
-      );
+
+      final recipeData = {
+        "title": title,
+        "ingredients": widget.ingredients,
+        "cuisine": widget.cuisine,
+        "fullText": recipe,
+        "timestamp": FieldValue.serverTimestamp(),
+      };
+
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(user.uid)
+          .collection("history")
+          .add(recipeData);
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Recipe saved to history")),
+        const SnackBar(content: Text("Recipe saved successfully ✅")),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to save recipe: $e")),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Error saving recipe: $e")));
     }
+  }
+
+  /// ✅ Properly format and clean recipe text
+  Widget _buildCleanRecipeText(String recipeText) {
+    // Step 1: Remove all hashtags
+    String cleaned = recipeText.replaceAll('#', '');
+
+    // Step 2: Split into lines and remove empties
+    List<String> lines = cleaned.split('\n').map((e) => e.trim()).toList();
+    lines.removeWhere((line) => line.isEmpty);
+
+    // Step 3: Add visual formatting (headings + bullets)
+    List<InlineSpan> textSpans = [];
+    for (var line in lines) {
+      // Detect headers like "Ingredients", "Instructions", etc.
+      if (RegExp(r'ingredients|instructions|steps|directions', caseSensitive: false)
+          .hasMatch(line)) {
+        textSpans.add(TextSpan(
+          text: "\n${line.toUpperCase()}\n",
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: Colors.orange,
+            height: 2.0,
+          ),
+        ));
+      } 
+      // Detect bullet points
+      else if (RegExp(r'^(\d+\.|\-|\*)').hasMatch(line)) {
+        textSpans.add(TextSpan(
+          text: "• ${line.replaceAll(RegExp(r'^(\d+\.|\-|\*)'), '').trim()}\n",
+          style: const TextStyle(fontSize: 16, height: 1.6),
+        ));
+      } 
+      // Normal paragraph
+      else {
+        textSpans.add(TextSpan(
+          text: "$line\n",
+          style: const TextStyle(fontSize: 16, height: 1.6),
+        ));
+      }
+    }
+
+    return RichText(
+      text: TextSpan(style: const TextStyle(color: Colors.black87), children: textSpans),
+    );
   }
 
   @override
@@ -235,143 +190,67 @@ class _RecipeDetailState extends State<RecipeDetail> {
       appBar: AppBar(
         backgroundColor: Colors.orange,
         title: const Text(
-          "Recipe Details",
+          "Recipe Detail",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 3,
       ),
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Colors.orange),
-            )
+          ? const Center(child: CircularProgressIndicator(color: Colors.orange))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  // 🧡 Recipe Text
                   Card(
-                    elevation: 3,
+                    elevation: 4,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     color: Colors.orange.shade50,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        recipe,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          height: 1.5,
-                          color: Colors.black87,
-                        ),
-                      ),
+                      child: _buildCleanRecipeText(recipe),
                     ),
                   ),
 
                   const SizedBox(height: 20),
 
-                  // 🎥 YouTube Player Section
-                  if (_videoId != null) ...[
-                    const Text(
-                      "Watch Recipe Tutorial:",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    
-                    // Video loading state
-                    if (_isVideoLoading)
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
+                  if (_videoId != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Watch Recipe Tutorial:",
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange),
                         ),
-                        child: const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(color: Colors.orange),
-                              SizedBox(height: 10),
-                              Text('Loading video...'),
-                            ],
+                        const SizedBox(height: 10),
+                        YoutubePlayerBuilder(
+                          player: YoutubePlayer(
+                            controller: _youtubeController!,
+                            showVideoProgressIndicator: true,
+                            progressIndicatorColor: Colors.orange,
+                          ),
+                          builder: (context, player) => ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: player,
                           ),
                         ),
-                      )
-                    else if (_videoLoadFailed)
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.error_outline, color: Colors.red, size: 40),
-                              const SizedBox(height: 10),
-                              const Text('Failed to load video'),
-                              const SizedBox(height: 10),
-                              ElevatedButton.icon(
-                                onPressed: _retryVideo,
-                                icon: const Icon(Icons.refresh),
-                                label: const Text('Retry Video'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                  foregroundColor: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    else if (_youtubeController != null)
-                      YoutubePlayerBuilder(
-                        player: YoutubePlayer(
-                          controller: _youtubeController!,
-                          showVideoProgressIndicator: true,
-                          progressIndicatorColor: Colors.orange,
-                          onReady: () {
-                            print("✅ YouTube player is ready");
-                          },
-                          onEnded: (error) {
-                            print("❌ YouTube player error: $error");
-                            if (mounted) {
-                              setState(() {
-                                _videoLoadFailed = true;
-                              });
-                            }
-                          },
-                        ),
-                        builder: (context, player) => ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: player,
-                        ),
-                      ),
-                  ] else ...[
-                    // No video available
+                      ],
+                    )
+                  else
                     Container(
                       height: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'No tutorial video available',
-                          style: TextStyle(color: Colors.grey),
-                        ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'No tutorial video available',
+                        style: TextStyle(color: Colors.grey),
                       ),
                     ),
-                  ],
                 ],
               ),
             ),
@@ -379,9 +258,8 @@ class _RecipeDetailState extends State<RecipeDetail> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _saveRecipe,
         backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.history),
-        label: const Text("Save to history"),
+        icon: const Icon(Icons.save),
+        label: const Text("Save Recipe"),
       ),
     );
   }

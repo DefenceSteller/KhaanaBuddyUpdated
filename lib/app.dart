@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:khaanabuddy/screens/home_screen.dart';
+import 'package:khaanabuddy/screens/profile_screen.dart';
 import 'package:khaanabuddy/screens/recipe_detail.dart';
 import 'package:khaanabuddy/screens/history_screen.dart';
 import 'package:provider/provider.dart';
@@ -7,10 +8,10 @@ import 'providers/theme_provider.dart';
 import 'themes/theme.dart';
 import 'package:khaanabuddy/screens/login_screen.dart';
 import 'package:khaanabuddy/screens/signup_screen.dart';
+import 'package:khaanabuddy/screens/splash_screen.dart'; // 👈 Added splash screen import
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
 import 'themes/theme.dart';
-import 'AuthWrapper.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -35,7 +36,6 @@ class AppContent extends StatelessWidget {
       title: 'KhaanaBuddy',
       debugShowCheckedModeBanner: false,
 
-      // 🟠 Theme setup
       theme: lightTheme.copyWith(
         primaryColor: Colors.orange,
         appBarTheme: const AppBarTheme(
@@ -47,14 +47,39 @@ class AppContent extends StatelessWidget {
       darkTheme: darkTheme,
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
 
-home: const LoginScreen(),
-routes: {
-  '/login': (context) => const LoginScreen(),
-  '/signup': (context) => const SignupScreen(),
-  '/home': (context) => const HomeScreen(),
-  '/recipe': (context) => const RecipeDetail(),
-  '/history': (context) => const HistoryScreen(),
-},
+
+      // 👇 Start with SplashScreen first
+      initialRoute: '/splash',
+
+      routes: {
+        '/splash': (context) => const SplashScreen(), // 👈 Added this
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/history': (context) => const HistoryScreen(),
+        '/profile': (context) => const ProfileScreen(),
+      },
+
+      // ✅ Global route handling for recipe details
+      onGenerateRoute: (settings) {
+        if (settings.name == '/recipe') {
+          final args = settings.arguments as Map<String, dynamic>?;
+
+          return MaterialPageRoute(
+            builder: (context) => RecipeDetail(
+              ingredients: args?['ingredients'] ?? '',
+              cuisine: args?['cuisine'] ?? '',
+            ),
+          );
+        }
+
+        // fallback page
+        return MaterialPageRoute(
+          builder: (context) => const Scaffold(
+            body: Center(child: Text('404: Page Not Found')),
+          ),
+        );
+      },
     );
   }
 }
