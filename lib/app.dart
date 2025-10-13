@@ -9,9 +9,9 @@ import 'themes/theme.dart';
 import 'package:khaanabuddy/screens/login_screen.dart';
 import 'package:khaanabuddy/screens/signup_screen.dart';
 import 'package:khaanabuddy/screens/splash_screen.dart'; // 👈 Added splash screen import
-import 'package:provider/provider.dart';
-import 'providers/theme_provider.dart';
-import 'themes/theme.dart';
+// import 'package:provider/provider.dart';
+// import 'providers/theme_provider.dart';
+// import 'themes/theme.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
