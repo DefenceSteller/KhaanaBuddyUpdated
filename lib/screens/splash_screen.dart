@@ -48,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.orange,
+      backgroundColor: const Color(0xFFFF7A1A),
       body: Center(
         child: ScaleTransition(
           scale: _animation,
@@ -57,13 +57,13 @@ class _SplashScreenState extends State<SplashScreen>
             children: [
               // 🔹 Your logo
               Image.asset(
-                'lib/assets/KhaanaBuddy_logo.png',
+                'lib/assets/CookMate_logo.png',
                 width: 150,
                 height: 150,
               ),
               const SizedBox(height: 30),
               const Text(
-                "KhaanaBuddy",
+                "CookMate",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,

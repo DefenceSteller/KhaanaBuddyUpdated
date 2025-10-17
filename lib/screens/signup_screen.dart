@@ -23,7 +23,7 @@ class _SignupScreenState extends State<SignupScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Sign Up"),
-        backgroundColor: Colors.orange,
+        backgroundColor: const Color(0xFFFF7A1A),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -37,7 +37,7 @@ class _SignupScreenState extends State<SignupScreen> {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.orange,
+                color: Color(0xFFFF7A1A),
               ),
             ),
             const SizedBox(height: 30),
@@ -49,14 +49,14 @@ class _SignupScreenState extends State<SignupScreen> {
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 labelText: 'Email',
-                prefixIcon: const Icon(Icons.email, color: Colors.orange),
+                prefixIcon: const Icon(Icons.email, color: Color(0xFFFF7A1A)),
                 filled: true,
                 fillColor: Colors.orange.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.orange, width: 2),
+                  borderSide: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -69,14 +69,14 @@ class _SignupScreenState extends State<SignupScreen> {
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Password',
-                prefixIcon: const Icon(Icons.lock, color: Colors.orange),
+                prefixIcon: const Icon(Icons.lock, color: Color(0xFFFF7A1A)),
                 filled: true,
                 fillColor: Colors.orange.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.orange, width: 2),
+                  borderSide: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -90,14 +90,14 @@ class _SignupScreenState extends State<SignupScreen> {
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
-                prefixIcon: const Icon(Icons.lock_outline, color: Colors.orange),
+                prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFFFF7A1A)),
                 filled: true,
                 fillColor: Colors.orange.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.orange, width: 2),
+                  borderSide: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -110,7 +110,7 @@ class _SignupScreenState extends State<SignupScreen> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _signup,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
+                  backgroundColor: const Color(0xFFFF7A1A),
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(
@@ -141,7 +141,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: const Text(
                   "Already have an account? Login",
                   style: TextStyle(
-                    color: Colors.orange,
+                    color: Color(0xFFFF7A1A),
                     fontWeight: FontWeight.bold,
                   ),
                 ),

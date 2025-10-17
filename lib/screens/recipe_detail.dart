@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:khaanabuddy/services/ai_service.dart';
-// import 'package:khaanabuddy/services/firestore_service.dart';
 import 'package:khaanabuddy/voice/voice_service.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:khaanabuddy/services/youtube_service.dart';
@@ -21,7 +20,8 @@ class RecipeDetail extends StatefulWidget {
   State<RecipeDetail> createState() => _RecipeDetailState();
 }
 
-class _RecipeDetailState extends State<RecipeDetail> {
+class _RecipeDetailState extends State<RecipeDetail>
+    with SingleTickerProviderStateMixin {
   String recipe = "";
   bool isLoading = true;
 
@@ -30,10 +30,24 @@ class _RecipeDetailState extends State<RecipeDetail> {
   bool _isVideoLoading = false;
   bool _videoLoadFailed = false;
 
-  @override
+  late AnimationController _aiAnimationController;
+  late Animation<double> _bounceAnimation;
 
+  @override
   void initState() {
     super.initState();
+
+    _aiAnimationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _bounceAnimation =
+        Tween<double>(begin: 0, end: 10).animate(CurvedAnimation(
+      parent: _aiAnimationController,
+      curve: Curves.easeInOut,
+    ));
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadRecipe(widget.ingredients, widget.cuisine);
     });
@@ -43,7 +57,6 @@ class _RecipeDetailState extends State<RecipeDetail> {
     try {
       final result = await AIService.getRecipe(ingredients, cuisine);
       if (!mounted) return;
-
 
       setState(() {
         recipe = result;
@@ -81,7 +94,6 @@ class _RecipeDetailState extends State<RecipeDetail> {
       if (!mounted) return;
       setState(() {
         recipe = "Error loading recipe: $e";
-
         _isVideoLoading = false;
         _videoLoadFailed = true;
       });
@@ -91,15 +103,26 @@ class _RecipeDetailState extends State<RecipeDetail> {
   }
 
   Map<String, String> _extractRecipeInfo(String recipe) {
-    final lines = recipe.split('\n');
+    final titleMatch =
+        RegExp(r'<title>(.*?)<\/title>', dotAll: true).firstMatch(recipe);
     final info = <String, String>{};
-    if (lines.isNotEmpty) info['dishName'] = lines.first.replaceAll('#', '').trim();
+    if (titleMatch != null) {
+      info['dishName'] = titleMatch.group(1)?.trim() ?? '';
+    } else {
+      final markdownTitleMatch =
+          RegExp(r'\*{1,2}(.*?)\*{1,2}').firstMatch(recipe);
+      if (markdownTitleMatch != null) {
+        info['dishName'] = markdownTitleMatch.group(1)?.trim() ?? '';
+      } else {
+        final lines = recipe.split('\n');
+        if (lines.isNotEmpty) info['dishName'] = lines.first.trim();
+      }
+    }
     return info;
   }
 
   Future<void> _saveRecipe() async {
     try {
-
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
 
@@ -131,40 +154,90 @@ class _RecipeDetailState extends State<RecipeDetail> {
     }
   }
 
-  /// ✅ Properly format and clean recipe text
   Widget _buildCleanRecipeText(String recipeText) {
-    // Step 1: Remove all hashtags
-    String cleaned = recipeText.replaceAll('#', '');
+    final titleRegex = RegExp(r'<title>(.*?)<\/title>', dotAll: true);
+    final markdownTitleRegex = RegExp(r'\*{1,2}(.*?)\*{1,2}');
+    String title = '';
 
-    // Step 2: Split into lines and remove empties
+    final titleMatch = titleRegex.firstMatch(recipeText);
+    if (titleMatch != null) {
+      title = titleMatch.group(1)?.trim() ?? '';
+      recipeText = recipeText.replaceAll(titleRegex, '');
+    } else {
+      final markdownMatch = markdownTitleRegex.firstMatch(recipeText);
+      if (markdownMatch != null) {
+        title = markdownMatch.group(1)?.trim() ?? '';
+        recipeText = recipeText.replaceAll(markdownTitleRegex, '');
+      }
+    }
+
+    String cleaned = recipeText.replaceAll('#', '');
     List<String> lines = cleaned.split('\n').map((e) => e.trim()).toList();
     lines.removeWhere((line) => line.isEmpty);
 
-    // Step 3: Add visual formatting (headings + bullets)
     List<InlineSpan> textSpans = [];
+
+    if (title.isNotEmpty) {
+      textSpans.add(TextSpan(
+        text: "$title\n\n",
+        style: const TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFFFF7A1A),
+          height: 1.8,
+        ),
+      ));
+    }
+
     for (var line in lines) {
-      // Detect headers like "Ingredients", "Instructions", etc.
-      if (RegExp(r'ingredients|instructions|steps|directions', caseSensitive: false)
+      if (RegExp(r'ingredients|instructions|serving tip|steps|directions',
+              caseSensitive: false)
           .hasMatch(line)) {
         textSpans.add(TextSpan(
           text: "\n${line.toUpperCase()}\n",
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
-            color: Colors.orange,
+            color: Color(0xFFFF7A1A),
             height: 2.0,
           ),
         ));
-      } 
-      // Detect bullet points
-      else if (RegExp(r'^(\d+\.|\-|\*)').hasMatch(line)) {
+      } else if (RegExp(r'^(\d+\.|\-|\*)').hasMatch(line)) {
         textSpans.add(TextSpan(
           text: "• ${line.replaceAll(RegExp(r'^(\d+\.|\-|\*)'), '').trim()}\n",
           style: const TextStyle(fontSize: 16, height: 1.6),
         ));
-      } 
-      // Normal paragraph
-      else {
+      } else if (line.contains(widget.cuisine)) {
+        textSpans.add(TextSpan(
+          children: [
+            TextSpan(
+              text: line.replaceAll(widget.cuisine, ''),
+              style: const TextStyle(fontSize: 16, color: Colors.black87),
+            ),
+            TextSpan(
+              text: widget.cuisine,
+              style: const TextStyle(
+                  color: Color(0xFFFF7A1A), fontWeight: FontWeight.bold),
+            ),
+            const TextSpan(text: "\n"),
+          ],
+        ));
+      } else if (line.contains(widget.ingredients)) {
+        textSpans.add(TextSpan(
+          children: [
+            TextSpan(
+              text: line.replaceAll(widget.ingredients, ''),
+              style: const TextStyle(fontSize: 16, color: Colors.black87),
+            ),
+            TextSpan(
+              text: widget.ingredients,
+              style: const TextStyle(
+                  color: Color(0xFFFF7A1A), fontWeight: FontWeight.bold),
+            ),
+            const TextSpan(text: "\n"),
+          ],
+        ));
+      } else {
         textSpans.add(TextSpan(
           text: "$line\n",
           style: const TextStyle(fontSize: 16, height: 1.6),
@@ -173,13 +246,17 @@ class _RecipeDetailState extends State<RecipeDetail> {
     }
 
     return RichText(
-      text: TextSpan(style: const TextStyle(color: Colors.black87), children: textSpans),
+      text: TextSpan(
+        style: const TextStyle(color: Colors.black87),
+        children: textSpans,
+      ),
     );
   }
 
   @override
   void dispose() {
     _youtubeController?.dispose();
+    _aiAnimationController.dispose();
     super.dispose();
   }
 
@@ -188,21 +265,63 @@ class _RecipeDetailState extends State<RecipeDetail> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
+        backgroundColor: const Color(0xFFFF7A1A),
         title: const Text(
           "Recipe Detail",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
+
       body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.orange))
+          ? Stack(
+              children: [
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.restaurant_menu,
+                          color: Color(0xFFFF7A1A), size: 60),
+                      SizedBox(height: 16),
+                      Text(
+                        "Cooking up your recipe...",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  bottom: 30,
+                  right: 30,
+                  child: AnimatedBuilder(
+                    animation: _bounceAnimation,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, -_bounceAnimation.value),
+                        child: Row(
+                          children: const [
+                            Icon(Icons.smart_toy,
+                                color: Color(0xFFFF7A1A), size: 40),
+                            SizedBox(width: 8),
+                            Text(
+                              "AI is thinking...",
+                              style: TextStyle(
+                                  color: Color(0xFFFF7A1A), fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   Card(
                     elevation: 4,
                     shape: RoundedRectangleBorder(
@@ -214,9 +333,7 @@ class _RecipeDetailState extends State<RecipeDetail> {
                       child: _buildCleanRecipeText(recipe),
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
                   if (_videoId != null)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,16 +341,17 @@ class _RecipeDetailState extends State<RecipeDetail> {
                         const Text(
                           "Watch Recipe Tutorial:",
                           style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFFF7A1A),
+                          ),
                         ),
                         const SizedBox(height: 10),
                         YoutubePlayerBuilder(
                           player: YoutubePlayer(
                             controller: _youtubeController!,
                             showVideoProgressIndicator: true,
-                            progressIndicatorColor: Colors.orange,
+                            progressIndicatorColor: Color(0xFFFF7A1A),
                           ),
                           builder: (context, player) => ClipRRect(
                             borderRadius: BorderRadius.circular(12),
@@ -255,13 +373,15 @@ class _RecipeDetailState extends State<RecipeDetail> {
               ),
             ),
 
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _saveRecipe,
-        backgroundColor: Colors.orange,
-        icon: const Icon(Icons.save),
-        label: const Text("Save Recipe"),
-      ),
+      /// ✅ Hide Save button while loading
+      floatingActionButton: isLoading
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _saveRecipe,
+              backgroundColor: const Color(0xFFFF7A1A),
+              icon: const Icon(Icons.save),
+              label: const Text("Save Recipe"),
+            ),
     );
   }
-
 }

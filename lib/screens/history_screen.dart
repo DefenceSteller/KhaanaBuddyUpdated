@@ -30,7 +30,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           data["title"] ?? "Recipe",
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.orange,
+            color: Color(0xFFFF7A1A),
             fontSize: 22,
           ),
         ),
@@ -80,7 +80,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child:
-                const Text("Close", style: TextStyle(color: Colors.orange)),
+                const Text("Close", style: TextStyle(color: Color(0xFFFF7A1A))),
           ),
         ],
       ),
@@ -93,7 +93,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Recipe History"),
-        backgroundColor: Colors.orange,
+        backgroundColor: const Color(0xFFFF7A1A),
         foregroundColor: Colors.white,
         elevation: 2,
       ),
@@ -107,7 +107,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
 
             return const Center(
-              child: CircularProgressIndicator(color: Colors.orange),
+              child: CircularProgressIndicator(color: Color(0xFFFF7A1A)),
             );
           }
 
@@ -140,7 +140,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   leading: CircleAvatar(
                     backgroundColor: Colors.orange.shade100,
                     child:
-                        const Icon(Icons.restaurant, color: Colors.orange),
+                        const Icon(Icons.restaurant, color: Color(0xFFFF7A1A)),
                   ),
                   title: Text(
                     data["title"] ?? "Untitled Recipe",

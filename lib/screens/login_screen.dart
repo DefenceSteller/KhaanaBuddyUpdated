@@ -24,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Login"),
-        backgroundColor: Colors.orange,
+        backgroundColor: const Color(0xFFFF7A1A),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+                  color: Color(0xFFFF7A1A),
                 ),
               ),
               const SizedBox(height: 30),
@@ -50,14 +50,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   labelText: 'Email',
-                  prefixIcon: const Icon(Icons.email, color: Colors.orange),
+                  prefixIcon: const Icon(Icons.email, color: Color(0xFFFF7A1A)),
                   filled: true,
                   fillColor: Colors.orange.shade50,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.orange, width: 2),
+                    borderSide: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -70,14 +70,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock, color: Colors.orange),
+                  prefixIcon: const Icon(Icons.lock, color: Color(0xFFFF7A1A)),
                   filled: true,
                   fillColor: Colors.orange.shade50,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.orange, width: 2),
+                    borderSide: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -90,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: const Color(0xFFFF7A1A),
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(50),
                     shape: RoundedRectangleBorder(
@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: const Text(
                     "Don't have an account? Sign up",
                     style: TextStyle(
-                      color: Colors.orange,
+                      color: Color(0xFFFF7A1A),
                       fontWeight: FontWeight.bold,
                     ),
                   ),

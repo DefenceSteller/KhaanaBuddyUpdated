@@ -1,7 +1,5 @@
-// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:khaanabuddy/screens/history_screen.dart';
 import 'package:khaanabuddy/screens/profile_screen.dart';
@@ -16,13 +14,23 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController ingredientController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
   String selectedCuisine = "Italian";
   String? userName;
-  bool _loadingName = true; // ✅ add loading flag
+  bool _loadingName = true;
+  final FocusNode _searchFocus = FocusNode();
 
   final List<String> cuisines = [
-    "Italian", "Chinese", "Indian", "Mexican", "American",
-    "Thai", "Pakistani", "English", "Mughlai", "French"
+    "Italian",
+    "Chinese",
+    "Indian",
+    "Mexican",
+    "American",
+    "Thai",
+    "Pakistani",
+    "English",
+    "Mughlai",
+    "French"
   ];
 
   @override
@@ -36,10 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (user == null) return;
 
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
       if (doc.exists) {
         final data = doc.data();
@@ -69,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openProfile() async {
-    // ✅ Wait for user to return from profile page, then refresh name
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const ProfileScreen()),
@@ -93,9 +97,37 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(
         builder: (context) => RecipeDetail(
           ingredients: ingredients,
-          cuisine: selectedCuisine,
+          cuisine: selectedCuisine, // ✅ no isSearchMode needed
         ),
       ),
+    );
+  }
+
+  void _searchRecipe() {
+    final query = searchController.text.trim();
+    if (query.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a recipe name to search')),
+      );
+      return;
+    }
+
+    // ✅ Only search recipe by name — cuisine ignored
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RecipeDetail(
+          ingredients: query, // treat as search keyword
+          cuisine: "", // empty cuisine → AI auto-detects search mode
+        ),
+      ),
+    );
+  }
+
+  void _scrollToSearch() {
+    FocusScope.of(context).requestFocus(_searchFocus);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Type a recipe name in the top search bar')),
     );
   }
 
@@ -103,11 +135,28 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("KhaanaBuddy"),
-        backgroundColor: Colors.orange,
+        title: SizedBox(
+          height: 40,
+          child: TextField(
+            controller: searchController,
+            focusNode: _searchFocus,
+            textInputAction: TextInputAction.search,
+            onSubmitted: (_) => _searchRecipe(),
+            decoration: InputDecoration(
+              hintText: "Search any recipe...",
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25),
+                borderSide: BorderSide.none,
+              ),
+              prefixIcon: const Icon(Icons.search, color: Color(0xFFFF7A1A)),
+            ),
+          ),
+        ),
+        backgroundColor: const Color(0xFFFF7A1A),
         foregroundColor: Colors.white,
-        elevation: 0,
-
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
@@ -126,12 +175,8 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ Show name or loading
             if (_loadingName)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 15),
-                child: LinearProgressIndicator(color: Colors.orange),
-              )
+              const LinearProgressIndicator(color: Color(0xFFFF7A1A))
             else
               Padding(
                 padding: const EdgeInsets.only(bottom: 15),
@@ -140,11 +185,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange,
+                    color: Color(0xFFFF7A1A),
                   ),
                 ),
               ),
-
             const Text(
               "Enter Ingredients",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -161,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.orange, width: 2),
+                  borderSide: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -177,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: BoxDecoration(
                 color: Colors.orange.shade50,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange, width: 1),
+                border: Border.all(color: const Color(0xFFFF7A1A), width: 1),
               ),
               child: DropdownButton<String>(
                 value: selectedCuisine,
@@ -195,12 +239,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 }).toList(),
               ),
             ),
-
             const Spacer(flex: 2),
             ElevatedButton(
               onPressed: _findRecipes,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color(0xFFFF7A1A),
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(
@@ -209,29 +252,42 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: const Text("Find Recipes", style: TextStyle(fontSize: 16)),
             ),
-
             const SizedBox(height: 15),
             OutlinedButton.icon(
               onPressed: _openHistory,
-              icon: const Icon(Icons.bookmark, color: Colors.orange),
+              icon: const Icon(Icons.bookmark, color: Color(0xFFFF7A1A)),
               label: const Text(
                 "View Saved Recipes",
-                style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                style: TextStyle(color: Color(0xFFFF7A1A), fontWeight: FontWeight.bold),
               ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
-                side: const BorderSide(color: Colors.orange, width: 2),
+                side: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
-
+            const SizedBox(height: 15),
+            OutlinedButton.icon(
+              onPressed: _scrollToSearch,
+              icon: const Icon(Icons.search, color: Color(0xFFFF7A1A)),
+              label: const Text(
+                "Search Recipe",
+                style: TextStyle(color: Color(0xFFFF7A1A), fontWeight: FontWeight.bold),
+              ),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                side: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
             const Spacer(flex: 3),
           ],
         ),
       ),
     );
   }
-
 }
