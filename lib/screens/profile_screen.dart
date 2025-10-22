@@ -31,7 +31,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = _user;
     if (user == null) return;
 
-    // Set email immediately
     _emailController.text = user.email ?? '';
 
     try {
@@ -64,20 +63,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _isProcessing = true);
 
     try {
-      // Save name + email to Firestore under users/{uid}
       await _firestore.collection('users').doc(user.uid).set({
         'name': name,
         'email': user.email,
       }, SetOptions(merge: true));
 
-      // Try to update the FirebaseAuth displayName.
-      // This can trigger internal FlutterFire native deserialization bugs on some devices/versions.
-      // We call it in a try/catch and DO NOT surface errors to the user, because the Firestore save is the source of truth.
       try {
         await user.updateDisplayName(name);
-        // don't call user.reload() — that sometimes triggers plugin issues
       } catch (e) {
-        // Log the error but don't show it to user (avoids Pigeon deserialization crash)
         debugPrint('Non-fatal: updateDisplayName failed (ignored): $e');
       }
 
@@ -113,12 +106,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final emailText = _emailController.text.isNotEmpty ? _emailController.text : 'No email';
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: Colors.orange,
+        backgroundColor: isDark ? Colors.grey[900] : const Color(0xFFFF7A1A),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -135,40 +129,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Center(
               child: CircleAvatar(
                 radius: 48,
-                backgroundColor: Colors.orange.shade100,
-                child: const Icon(Icons.person, size: 48, color: Colors.orange),
+                backgroundColor:
+                    isDark ? Colors.grey.shade800 : Colors.orange.shade100,
+                child: const Icon(Icons.person,
+                    size: 48, color: Color(0xFFFF7A1A)),
               ),
             ),
             const SizedBox(height: 24),
             TextField(
               controller: _nameController,
+              style: TextStyle(color: isDark ? Colors.white : Colors.black),
               decoration: InputDecoration(
                 labelText: 'Full name',
+                labelStyle:
+                    TextStyle(color: isDark ? Colors.white70 : Colors.black87),
                 filled: true,
-                fillColor: Colors.orange.shade50,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                fillColor:
+                    isDark ? Colors.grey.shade800 : Colors.orange.shade50,
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.white54 : Colors.orange),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.white : Colors.orange, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _emailController,
               readOnly: true,
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
               decoration: InputDecoration(
                 labelText: 'Email',
+                labelStyle:
+                    TextStyle(color: isDark ? Colors.white70 : Colors.black87),
                 filled: true,
-                fillColor: Colors.grey.shade100,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                fillColor:
+                    isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.white54 : Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.white : Colors.orange, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _isProcessing ? null : _saveProfile,
               icon: const Icon(Icons.save),
-              label: _isProcessing ? const Text('Saving...') : const Text('Save Changes'),
+              label: _isProcessing
+                  ? const Text('Saving...')
+                  : const Text('Save Changes'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color(0xFFFF7A1A),
                 minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],

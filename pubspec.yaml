@@ -10,24 +10,27 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^6.0.0
-  google_generative_ai: ^0.4.7
-  firebase_core: ^2.32.0
-  firebase_auth: ^4.15.3
-  google_sign_in: ^6.2.1
 
-  cloud_firestore: ^4.12.2
-  shared_preferences: ^2.2.2
+  provider: ^6.1.2
+  google_generative_ai: ^0.4.7
+
+  # ✅ Latest stable & compatible Firebase versions (as of Oct 2025)
+  firebase_core: ^4.2.0
+  firebase_auth: ^6.1.1
+  cloud_firestore: ^6.0.3
+  firebase_storage: ^13.0.3
+
+  # ✅ Google Sign-In (latest compatible)
+  google_sign_in: ^5.4.4
+
+  shared_preferences: ^2.3.3
   youtube_player_flutter: ^9.0.4
-  flutter_tts: ^3.6.3
+  flutter_tts: ^4.2.3
   speech_to_text: ^7.0.0
   animated_splash_screen: ^1.3.0
-  flutter_launcher_icons: ^0.13.1
   cupertino_icons: ^1.0.8
-  http: ^1.1.0
-
-  flutter_inappwebview: ^6.0.0
-  firebase_storage: ^11.6.5
+  http: ^1.2.2
+  flutter_inappwebview: ^6.1.0
   image_picker: ^1.1.2
   
 
@@ -36,7 +39,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.2
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4   # ✅ keep only ONE version here
+
 
 flutter:
   uses-material-design: true
@@ -44,3 +49,8 @@ flutter:
     - "lib/assets/CookMate_logo.png"
     - "lib/assets/google_logo.png"
 
+# ✅ Step 3: Add launcher icon configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "lib/assets/khaanabuddy_logo_full.png"

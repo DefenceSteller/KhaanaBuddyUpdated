@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
-// import 'home_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -13,17 +12,20 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
-
   final TextEditingController confirmPassword = TextEditingController();
+
   bool _isLoading = false;
   final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text("Sign Up"),
-        backgroundColor: const Color(0xFFFF7A1A),
+        backgroundColor: isDark ? Colors.grey[900] : const Color(0xFFFF7A1A),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -32,12 +34,12 @@ class _SignupScreenState extends State<SignupScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Create Account ✨",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFFF7A1A),
+                color: isDark ? Colors.white : const Color(0xFFFF7A1A),
               ),
             ),
             const SizedBox(height: 30),
@@ -45,18 +47,24 @@ class _SignupScreenState extends State<SignupScreen> {
             // Email Field
             TextField(
               controller: email,
-
               keyboardType: TextInputType.emailAddress,
+              style: TextStyle(color: isDark ? Colors.white : Colors.black),
               decoration: InputDecoration(
                 labelText: 'Email',
-                prefixIcon: const Icon(Icons.email, color: Color(0xFFFF7A1A)),
+                labelStyle:
+                    TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+                prefixIcon: Icon(Icons.email,
+                    color: isDark ? Colors.orange : const Color(0xFFFF7A1A)),
                 filled: true,
-                fillColor: Colors.orange.shade50,
+                fillColor:
+                    isDark ? Colors.grey[850] : Colors.orange.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.orange : const Color(0xFFFF7A1A),
+                      width: 2),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -67,37 +75,50 @@ class _SignupScreenState extends State<SignupScreen> {
             TextField(
               controller: password,
               obscureText: true,
+              style: TextStyle(color: isDark ? Colors.white : Colors.black),
               decoration: InputDecoration(
                 labelText: 'Password',
-                prefixIcon: const Icon(Icons.lock, color: Color(0xFFFF7A1A)),
+                labelStyle:
+                    TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+                prefixIcon: Icon(Icons.lock,
+                    color: isDark ? Colors.orange : const Color(0xFFFF7A1A)),
                 filled: true,
-                fillColor: Colors.orange.shade50,
+                fillColor:
+                    isDark ? Colors.grey[850] : Colors.orange.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.orange : const Color(0xFFFF7A1A),
+                      width: 2),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
 
             // Confirm Password Field
             TextField(
               controller: confirmPassword,
               obscureText: true,
+              style: TextStyle(color: isDark ? Colors.white : Colors.black),
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
-                prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFFFF7A1A)),
+                labelStyle:
+                    TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+                prefixIcon: Icon(Icons.lock_outline,
+                    color: isDark ? Colors.orange : const Color(0xFFFF7A1A)),
                 filled: true,
-                fillColor: Colors.orange.shade50,
+                fillColor:
+                    isDark ? Colors.grey[850] : Colors.orange.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
+                  borderSide: BorderSide(
+                      color: isDark ? Colors.orange : const Color(0xFFFF7A1A),
+                      width: 2),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -110,14 +131,15 @@ class _SignupScreenState extends State<SignupScreen> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _signup,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF7A1A),
+                  backgroundColor:
+                      isDark ? Colors.orange : const Color(0xFFFF7A1A),
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: _isLoading 
+                child: _isLoading
                     ? const SizedBox(
                         height: 20,
                         width: 20,
@@ -135,13 +157,15 @@ class _SignupScreenState extends State<SignupScreen> {
             // Redirect to Login
             Center(
               child: TextButton(
-                onPressed: _isLoading ? null : () {
-                  Navigator.pushNamed(context, '/login');
-                },
-                child: const Text(
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        Navigator.pushReplacementNamed(context, '/login');
+                      },
+                child: Text(
                   "Already have an account? Login",
                   style: TextStyle(
-                    color: Color(0xFFFF7A1A),
+                    color: isDark ? Colors.orange : const Color(0xFFFF7A1A),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -154,9 +178,9 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _signup() async {
-    // Basic validation
-
-    if (email.text.isEmpty || password.text.isEmpty || confirmPassword.text.isEmpty) {
+    if (email.text.isEmpty ||
+        password.text.isEmpty ||
+        confirmPassword.text.isEmpty) {
       _showError("Please fill all fields");
       return;
     }
@@ -167,7 +191,6 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     if (password.text.length < 6) {
-
       _showError("Password must be at least 6 characters");
       return;
     }
@@ -182,33 +205,26 @@ class _SignupScreenState extends State<SignupScreen> {
     });
 
     try {
-
       print('🔄 Attempting signup for: ${email.text}');
       User? user = await _authService.signUp(email.text, password.text);
-      
-      if (!mounted) return;
-      
-      if (user != null) {
 
+      if (!mounted) return;
+
+      if (user != null) {
         print('✅ Signup successful for: ${user.email}');
-        print('➡️ Navigating to home screen...');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Signup successful!"),
             backgroundColor: Colors.green,
           ),
         );
-        
-        // Use named route for navigation
         Navigator.pushReplacementNamed(context, '/home');
       } else {
-        print('❌ Signup failed: User is null');
         _showError("Signup failed - please try again");
       }
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
-      
-      print('🔥 Firebase Auth Error: ${e.code} - ${e.message}');
+
       String errorMessage = "Signup failed";
       switch (e.code) {
         case 'email-already-in-use':
@@ -226,37 +242,10 @@ class _SignupScreenState extends State<SignupScreen> {
         default:
           errorMessage = "Signup failed: ${e.message}";
       }
-      
       _showError(errorMessage);
     } catch (e) {
       if (!mounted) return;
-      print('❌ Unexpected error: $e');
-      
-      // SPECIAL HANDLING FOR PIGEON ERROR - ADDED THIS BLOCK
-      if (e.toString().contains('PigeonUserDetails') || e.toString().contains('List<Object?>')) {
-        print('⚠️ Pigeon error detected, checking if user was created anyway...');
-        
-        // Check if user was actually created despite the error
-        await Future.delayed(const Duration(seconds: 1));
-        final currentUser = FirebaseAuth.instance.currentUser;
-        
-        if (currentUser != null && currentUser.email == email.text.trim()) {
-          print('✅ User was created successfully despite pigeon error!');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Signup successful!"),
-              backgroundColor: Colors.green,
-            ),
-          );
-          Navigator.pushReplacementNamed(context, '/home');
-          return;
-        } else {
-          print('❌ User creation actually failed');
-          _showError("Signup failed - please try again");
-        }
-      } else {
-        _showError("An unexpected error occurred: $e");
-      }
+      _showError("An unexpected error occurred: $e");
     } finally {
       if (mounted) {
         setState(() {
@@ -265,7 +254,6 @@ class _SignupScreenState extends State<SignupScreen> {
       }
     }
   }
-
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(

@@ -63,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 30),
               const Text(
-                "CookMate",
+                "KhaanaBuddy",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,

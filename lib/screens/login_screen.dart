@@ -1,7 +1,8 @@
+// lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
-import '../services/google_auth_service.dart'; // ✅ Added
+import '../services/google_auth_service.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,165 +18,171 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isLoading = false;
   final AuthService _authService = AuthService();
-  final GoogleAuthService _googleAuthService = GoogleAuthService(); // ✅ Added
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Login"),
-        backgroundColor: const Color(0xFFFF7A1A),
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView( // ✅ In case small screens
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Welcome Back 👋",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFFF7A1A),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Email Input
-              TextField(
-                controller: email,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: const Icon(Icons.email, color: Color(0xFFFF7A1A)),
-                  filled: true,
-                  fillColor: Colors.orange.shade50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
-                    borderRadius: BorderRadius.circular(12),
+    return WillPopScope(
+      onWillPop: () async => false, // 🔒 disables device back button
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Login"),
+          automaticallyImplyLeading: false, // 🔥 removes top-left back arrow
+          backgroundColor: const Color(0xFFFF7A1A),
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Welcome Back 👋",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFFF7A1A),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 30),
 
-              // Password Input
-              TextField(
-                controller: password,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock, color: Color(0xFFFF7A1A)),
-                  filled: true,
-                  fillColor: Colors.orange.shade50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Color(0xFFFF7A1A), width: 2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Login Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF7A1A),
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
+                // Email Input
+                TextField(
+                  controller: email,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon:
+                        const Icon(Icons.email, color: Color(0xFFFF7A1A)),
+                    filled: true,
+                    fillColor: Colors.orange.shade50,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Color(0xFFFF7A1A), width: 2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text("Login", style: TextStyle(fontSize: 16)),
                 ),
-              ),
+                const SizedBox(height: 20),
 
-              const SizedBox(height: 15),
-
-              // 🔹 OR Divider
-              const Row(
-                children: [
-                  Expanded(child: Divider(thickness: 1)),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Text("OR", style: TextStyle(color: Colors.grey)),
-                  ),
-                  Expanded(child: Divider(thickness: 1)),
-                ],
-              ),
-              const SizedBox(height: 15),
-
-              // ✅ Google Sign-In Button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  icon: Image.asset(
-                    'lib/assets/google_logo.png',
-                    height: 24,
-                  ),
-                  label: const Text(
-                    "Sign in with Google",
-                    style: TextStyle(fontSize: 16, color: Colors.black87),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(50),
-                    side: const BorderSide(color: Colors.grey),
-                    shape: RoundedRectangleBorder(
+                // Password Input
+                TextField(
+                  controller: password,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon:
+                        const Icon(Icons.lock, color: Color(0xFFFF7A1A)),
+                    filled: true,
+                    fillColor: Colors.orange.shade50,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Color(0xFFFF7A1A), width: 2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: _isLoading ? null : _signInWithGoogle,
                 ),
-              ),
+                const SizedBox(height: 30),
 
-              const SizedBox(height: 15),
+                // Login Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFF7A1A),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text("Login", style: TextStyle(fontSize: 16)),
+                  ),
+                ),
+                const SizedBox(height: 15),
 
-              // Signup Redirect
-              Center(
-                child: TextButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () {
-                          Navigator.pushNamed(context, '/signup');
-                        },
-                  child: const Text(
-                    "Don't have an account? Sign up",
-                    style: TextStyle(
-                      color: Color(0xFFFF7A1A),
-                      fontWeight: FontWeight.bold,
+                // OR Divider
+                const Row(
+                  children: [
+                    Expanded(child: Divider(thickness: 1)),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text("OR", style: TextStyle(color: Colors.grey)),
+                    ),
+                    Expanded(child: Divider(thickness: 1)),
+                  ],
+                ),
+                const SizedBox(height: 15),
+
+                // Google Sign-In Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: Image.asset(
+                      'lib/assets/google_logo.png',
+                      height: 24,
+                    ),
+                    label: const Text(
+                      "Sign in with Google",
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(50),
+                      side: const BorderSide(color: Colors.grey),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: _isLoading ? null : _signInWithGoogle,
+                  ),
+                ),
+                const SizedBox(height: 15),
+
+                // Signup Redirect
+                Center(
+                  child: TextButton(
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            Navigator.pushNamed(context, '/signup');
+                          },
+                    child: const Text(
+                      "Don't have an account? Sign up",
+                      style: TextStyle(
+                        color: Color(0xFFFF7A1A),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // 🔹 Normal Email/Password Login
+  // Email/Password Login
   Future<void> _login() async {
     if (email.text.isEmpty || password.text.isEmpty) {
       _showError("Please fill all fields");
@@ -216,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // 🔹 Google Sign-In
+  // Google Sign-In
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
     try {

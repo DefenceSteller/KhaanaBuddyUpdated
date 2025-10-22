@@ -8,10 +8,7 @@ import 'providers/theme_provider.dart';
 import 'themes/theme.dart';
 import 'package:khaanabuddy/screens/login_screen.dart';
 import 'package:khaanabuddy/screens/signup_screen.dart';
-import 'package:khaanabuddy/screens/splash_screen.dart'; // 👈 Added splash screen import
-// import 'package:provider/provider.dart';
-// import 'providers/theme_provider.dart';
-// import 'themes/theme.dart';
+import 'package:khaanabuddy/screens/splash_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -36,23 +33,29 @@ class AppContent extends StatelessWidget {
       title: 'KhaanaBuddy',
       debugShowCheckedModeBanner: false,
 
+      // ✅ Apply themes from theme.dart
       theme: lightTheme.copyWith(
-        primaryColor: Colors.orange,
+        primaryColor: Colors.deepOrange,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.orange,
+          backgroundColor: Colors.deepOrange,
           foregroundColor: Colors.white,
         ),
         scaffoldBackgroundColor: Colors.white,
       ),
-      darkTheme: darkTheme,
+      darkTheme: darkTheme.copyWith(
+        primaryColor: Colors.deepOrange,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.deepOrange,
+          foregroundColor: Colors.white,
+        ),
+      ),
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
 
-
-      // 👇 Start with SplashScreen first
+      // ✅ Start with Splash Screen
       initialRoute: '/splash',
 
       routes: {
-        '/splash': (context) => const SplashScreen(), // 👈 Added this
+        '/splash': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/home': (context) => const HomeScreen(),
@@ -60,7 +63,7 @@ class AppContent extends StatelessWidget {
         '/profile': (context) => const ProfileScreen(),
       },
 
-      // ✅ Global route handling for recipe details
+      // ✅ Handle Recipe Detail dynamically
       onGenerateRoute: (settings) {
         if (settings.name == '/recipe') {
           final args = settings.arguments as Map<String, dynamic>?;

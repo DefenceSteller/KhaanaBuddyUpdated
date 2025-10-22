@@ -4,12 +4,47 @@ class AIService {
   static const String apiKey = "AIzaSyDVyZ7YZ6QIswgvTXZNDR2ISbcilBGRRhY";
 
   static Future<String> getRecipe(String ingredients, String cuisine) async {
+    // ✅ Step 1: Safety filter for inappropriate or irrelevant inputs
+    final bannedWords = [
+      "kill", "sex", "nude", "bomb", "weapon", "fight", "war", "politics",
+      "violence", "blood", "drug", "alcohol", "gun", "murder", "death",
+      "crime", "terror", "virus", "disease", "hack", "joke", "song",
+      "movie", "story", "game", "music", "love", "hate", "religion",
+      "chair", "table", "wood", "metal", "plastic", "toy", "car", "rock",
+      "phone", "laptop", "computer", "keyboard", "book", "pen", "shirt",
+      "dress", "shoe", "bag", "fan", "light", "bed", "door", "window"
+    ];
+
+    // ✅ Step 2: Common food-related words (helps detect valid cooking intent)
+    final foodKeywords = [
+      "chicken", "rice", "egg", "bread", "sugar", "flour", "milk", "salt",
+      "butter", "beef", "fish", "potato", "onion", "garlic", "pepper",
+      "oil", "tomato", "carrot", "cheese", "pasta", "beans", "corn",
+      "fruit", "vegetable", "spice", "curry", "soup", "cake", "cookie",
+      "dessert", "juice", "water", "tea", "coffee"
+    ];
+
+    final combinedInput = "${ingredients.toLowerCase()} ${cuisine.toLowerCase()}";
+
+    // ✅ Block empty, too short, or banned words
+    if (combinedInput.trim().isEmpty ||
+        combinedInput.length < 3 ||
+        bannedWords.any((word) => combinedInput.contains(word))) {
+      return "⚠️ Please enter valid cooking ingredients or cuisine names only.";
+    }
+
+    // ✅ If it doesn’t contain any food-like words, block it
+    final containsFoodWord =
+        foodKeywords.any((word) => combinedInput.contains(word));
+    if (!containsFoodWord) {
+      return "⚠️ That doesn't sound like a food or ingredient. Please enter real cooking ingredients.";
+    }
+
     final model = GenerativeModel(
       model: 'gemini-2.5-pro',
       apiKey: apiKey,
     );
 
-    // ✅ Detect if user searched a recipe directly (not ingredients)
     final bool isSearchQuery =
         cuisine.trim().isEmpty || cuisine.toLowerCase() == "default";
 

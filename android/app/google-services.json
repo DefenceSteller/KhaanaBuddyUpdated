@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "215274115316",
+    "firebase_url": "https://khaanabuddy-9fc4d-default-rtdb.firebaseio.com",
     "project_id": "khaanabuddy-9fc4d",
     "storage_bucket": "khaanabuddy-9fc4d.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.example.khaanabuddy"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "215274115316-3t6ct49r6fmuchhur3p5ftbo4ijengir.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.khaanabuddy",
+            "certificate_hash": "d24363cf9cdac0a0858aeefa6dbe2d858d628d25"
+          }
+        },
+        {
+          "client_id": "215274115316-ujgtfoiesocs1raa8e4884f6qk484nr4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCKWosQNSFqnbub1m6EdjrHE_XFOv8-ckA"
@@ -20,7 +34,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "215274115316-ujgtfoiesocs1raa8e4884f6qk484nr4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "215274115316-am3ar30jqj4qdbtgjcde3sphnuirdk6r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.khaanabuddy"
+              }
+            }
+          ]
         }
       }
     }

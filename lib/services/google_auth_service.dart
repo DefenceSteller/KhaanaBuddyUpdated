@@ -3,12 +3,18 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class GoogleAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+    ],
+  );
 
   /// ✅ Sign in with Google
   Future<User?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signInSilently() ??
+          await _googleSignIn.signIn();
+
       if (googleUser == null) return null; // user cancelled
 
       final GoogleSignInAuthentication googleAuth =
@@ -29,7 +35,7 @@ class GoogleAuthService {
 
   /// ✅ Sign out from Google
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
+    await _googleSignIn.disconnect();
     await _auth.signOut();
   }
 }

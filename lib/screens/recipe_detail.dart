@@ -33,6 +33,8 @@ class _RecipeDetailState extends State<RecipeDetail>
   late AnimationController _aiAnimationController;
   late Animation<double> _bounceAnimation;
 
+  final Color accentColor = const Color(0xFFFF7A1A);
+
   @override
   void initState() {
     super.initState();
@@ -175,15 +177,17 @@ class _RecipeDetailState extends State<RecipeDetail>
     List<String> lines = cleaned.split('\n').map((e) => e.trim()).toList();
     lines.removeWhere((line) => line.isEmpty);
 
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black87;
+
     List<InlineSpan> textSpans = [];
 
     if (title.isNotEmpty) {
       textSpans.add(TextSpan(
         text: "$title\n\n",
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.bold,
-          color: Color(0xFFFF7A1A),
+          color: accentColor,
           height: 1.8,
         ),
       ));
@@ -195,61 +199,28 @@ class _RecipeDetailState extends State<RecipeDetail>
           .hasMatch(line)) {
         textSpans.add(TextSpan(
           text: "\n${line.toUpperCase()}\n",
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
-            color: Color(0xFFFF7A1A),
+            color: accentColor,
             height: 2.0,
           ),
         ));
       } else if (RegExp(r'^(\d+\.|\-|\*)').hasMatch(line)) {
         textSpans.add(TextSpan(
           text: "• ${line.replaceAll(RegExp(r'^(\d+\.|\-|\*)'), '').trim()}\n",
-          style: const TextStyle(fontSize: 16, height: 1.6),
-        ));
-      } else if (line.contains(widget.cuisine)) {
-        textSpans.add(TextSpan(
-          children: [
-            TextSpan(
-              text: line.replaceAll(widget.cuisine, ''),
-              style: const TextStyle(fontSize: 16, color: Colors.black87),
-            ),
-            TextSpan(
-              text: widget.cuisine,
-              style: const TextStyle(
-                  color: Color(0xFFFF7A1A), fontWeight: FontWeight.bold),
-            ),
-            const TextSpan(text: "\n"),
-          ],
-        ));
-      } else if (line.contains(widget.ingredients)) {
-        textSpans.add(TextSpan(
-          children: [
-            TextSpan(
-              text: line.replaceAll(widget.ingredients, ''),
-              style: const TextStyle(fontSize: 16, color: Colors.black87),
-            ),
-            TextSpan(
-              text: widget.ingredients,
-              style: const TextStyle(
-                  color: Color(0xFFFF7A1A), fontWeight: FontWeight.bold),
-            ),
-            const TextSpan(text: "\n"),
-          ],
+          style: TextStyle(fontSize: 16, height: 1.6, color: textColor),
         ));
       } else {
         textSpans.add(TextSpan(
           text: "$line\n",
-          style: const TextStyle(fontSize: 16, height: 1.6),
+          style: TextStyle(fontSize: 16, height: 1.6, color: textColor),
         ));
       }
     }
 
     return RichText(
-      text: TextSpan(
-        style: const TextStyle(color: Colors.black87),
-        children: textSpans,
-      ),
+      text: TextSpan(children: textSpans),
     );
   }
 
@@ -262,10 +233,12 @@ class _RecipeDetailState extends State<RecipeDetail>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFF7A1A),
+        backgroundColor: accentColor,
         title: const Text(
           "Recipe Detail",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -279,14 +252,17 @@ class _RecipeDetailState extends State<RecipeDetail>
                 Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Icon(Icons.restaurant_menu,
-                          color: Color(0xFFFF7A1A), size: 60),
-                      SizedBox(height: 16),
+                          color: accentColor, size: 60),
+                      const SizedBox(height: 16),
                       Text(
                         "Cooking up your recipe...",
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
                       ),
                     ],
                   ),
@@ -300,14 +276,14 @@ class _RecipeDetailState extends State<RecipeDetail>
                       return Transform.translate(
                         offset: Offset(0, -_bounceAnimation.value),
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.smart_toy,
-                                color: Color(0xFFFF7A1A), size: 40),
-                            SizedBox(width: 8),
+                                color: accentColor, size: 40),
+                            const SizedBox(width: 8),
                             Text(
                               "AI is thinking...",
                               style: TextStyle(
-                                  color: Color(0xFFFF7A1A), fontSize: 16),
+                                  color: accentColor, fontSize: 16),
                             ),
                           ],
                         ),
@@ -327,7 +303,9 @@ class _RecipeDetailState extends State<RecipeDetail>
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    color: Colors.orange.shade50,
+                    color: isDark
+                        ? Colors.grey[900]
+                        : Colors.orange.shade50,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: _buildCleanRecipeText(recipe),
@@ -338,12 +316,12 @@ class _RecipeDetailState extends State<RecipeDetail>
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           "Watch Recipe Tutorial:",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFFFF7A1A),
+                            color: accentColor,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -351,7 +329,7 @@ class _RecipeDetailState extends State<RecipeDetail>
                           player: YoutubePlayer(
                             controller: _youtubeController!,
                             showVideoProgressIndicator: true,
-                            progressIndicatorColor: Color(0xFFFF7A1A),
+                            progressIndicatorColor: accentColor,
                           ),
                           builder: (context, player) => ClipRRect(
                             borderRadius: BorderRadius.circular(12),
@@ -364,21 +342,20 @@ class _RecipeDetailState extends State<RecipeDetail>
                     Container(
                       height: 100,
                       alignment: Alignment.center,
-                      child: const Text(
+                      child: Text(
                         'No tutorial video available',
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(color: Colors.grey[500]),
                       ),
                     ),
                 ],
               ),
             ),
 
-      /// ✅ Hide Save button while loading
       floatingActionButton: isLoading
           ? null
           : FloatingActionButton.extended(
               onPressed: _saveRecipe,
-              backgroundColor: const Color(0xFFFF7A1A),
+              backgroundColor: accentColor,
               icon: const Icon(Icons.save),
               label: const Text("Save Recipe"),
             ),
