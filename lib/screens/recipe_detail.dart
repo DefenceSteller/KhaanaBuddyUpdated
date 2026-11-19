@@ -3,6 +3,8 @@ import 'package:khaanabuddy/services/ai_service.dart';
 import 'package:khaanabuddy/voice/voice_service.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:khaanabuddy/services/youtube_service.dart';
+import 'package:khaanabuddy/themes/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -28,12 +30,11 @@ class _RecipeDetailState extends State<RecipeDetail>
   YoutubePlayerController? _youtubeController;
   String? _videoId;
   bool _isVideoLoading = false;
-  bool _videoLoadFailed = false;
 
   late AnimationController _aiAnimationController;
   late Animation<double> _bounceAnimation;
 
-  final Color accentColor = const Color(0xFFFF7A1A);
+  final Color accentColor = AppColors.orange;
 
   @override
   void initState() {
@@ -63,7 +64,6 @@ class _RecipeDetailState extends State<RecipeDetail>
       setState(() {
         recipe = result;
         _isVideoLoading = true;
-        _videoLoadFailed = false;
       });
 
       final recipeInfo = _extractRecipeInfo(result);
@@ -86,18 +86,24 @@ class _RecipeDetailState extends State<RecipeDetail>
         });
       } else {
         setState(() {
-          _videoLoadFailed = true;
           _isVideoLoading = false;
         });
       }
 
-      VoiceService().speak("Here’s a recipe for you.");
+      // Only speak when the user has voice readouts enabled in Profile.
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        if (prefs.getBool('voiceEnabled') ?? true) {
+          VoiceService().speak("Here’s a recipe for you.");
+        }
+      } catch (_) {
+        VoiceService().speak("Here’s a recipe for you.");
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
         recipe = "Error loading recipe: $e";
         _isVideoLoading = false;
-        _videoLoadFailed = true;
       });
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -186,9 +192,9 @@ class _RecipeDetailState extends State<RecipeDetail>
         text: "$title\n\n",
         style: TextStyle(
           fontSize: 22,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w800,
           color: accentColor,
-          height: 1.8,
+          height: 1.7,
         ),
       ));
     }
@@ -200,10 +206,11 @@ class _RecipeDetailState extends State<RecipeDetail>
         textSpans.add(TextSpan(
           text: "\n${line.toUpperCase()}\n",
           style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            fontSize: 17,
             color: accentColor,
             height: 2.0,
+            letterSpacing: 0.5,
           ),
         ));
       } else if (RegExp(r'^(\d+\.|\-|\*)').hasMatch(line)) {
@@ -234,16 +241,18 @@ class _RecipeDetailState extends State<RecipeDetail>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final text = Theme.of(context).textTheme;
+    final cardColor = isDark ? AppColors.darkSurface : AppColors.surface;
+    final cardBorder =
+        isDark ? AppColors.darkBorder : AppColors.border;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: accentColor,
         title: const Text(
           "Recipe Detail",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.w800),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
 
       body: isLoading
@@ -253,15 +262,41 @@ class _RecipeDetailState extends State<RecipeDetail>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.restaurant_menu,
-                          color: accentColor, size: 60),
-                      const SizedBox(height: 16),
+                      // Gradient icon bubble
+                      Container(
+                        width: 96,
+                        height: 96,
+                        decoration: const BoxDecoration(
+                          gradient: AppColors.gradient,
+                          shape: BoxShape.circle,
+                          boxShadow: [AppColors.glow],
+                        ),
+                        child: const Icon(
+                          Icons.restaurant_menu_rounded,
+                          color: Colors.white,
+                          size: 44,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                       Text(
                         "Cooking up your recipe...",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        style: text.titleLarge,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        "Our AI chef is working on it",
+                        style: text.bodySmall,
+                      ),
+                      const SizedBox(height: 28),
+                      SizedBox(
+                        width: 140,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: const LinearProgressIndicator(
+                            minHeight: 6,
+                            color: AppColors.orange,
+                            backgroundColor: AppColors.tint,
+                          ),
                         ),
                       ),
                     ],
@@ -269,23 +304,44 @@ class _RecipeDetailState extends State<RecipeDetail>
                 ),
                 Positioned(
                   bottom: 30,
-                  right: 30,
+                  right: 24,
                   child: AnimatedBuilder(
                     animation: _bounceAnimation,
                     builder: (context, child) {
                       return Transform.translate(
                         offset: Offset(0, -_bounceAnimation.value),
-                        child: Row(
-                          children: [
-                            Icon(Icons.smart_toy,
-                                color: accentColor, size: 40),
-                            const SizedBox(width: 8),
-                            Text(
-                              "AI is thinking...",
-                              style: TextStyle(
-                                  color: accentColor, fontSize: 16),
-                            ),
-                          ],
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkSurface
+                                : AppColors.surface,
+                            borderRadius: BorderRadius.circular(30),
+                            border: Border.all(color: AppColors.border),
+                            boxShadow: const [AppColors.softShadow],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.smart_toy_rounded,
+                                color: AppColors.orange,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "AI is thinking...",
+                                style: TextStyle(
+                                  color: AppColors.orange,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -294,57 +350,98 @@ class _RecipeDetailState extends State<RecipeDetail>
               ],
             )
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  // Recipe card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(color: cardBorder),
+                      boxShadow: isDark
+                          ? const []
+                          : const [AppColors.cardShadow],
                     ),
-                    color: isDark
-                        ? Colors.grey[900]
-                        : Colors.orange.shade50,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: _buildCleanRecipeText(recipe),
-                    ),
+                    child: _buildCleanRecipeText(recipe),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
+
+                  // Tutorial section
                   if (_videoId != null)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Watch Recipe Tutorial:",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: accentColor,
-                          ),
+                        Row(
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: AppColors.tint,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.play_circle_fill_rounded,
+                                color: AppColors.orange,
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Watch Recipe Tutorial",
+                              style: text.titleMedium,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 10),
-                        YoutubePlayerBuilder(
-                          player: YoutubePlayer(
-                            controller: _youtubeController!,
-                            showVideoProgressIndicator: true,
-                            progressIndicatorColor: accentColor,
-                          ),
-                          builder: (context, player) => ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: player,
+                        const SizedBox(height: 14),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: YoutubePlayerBuilder(
+                            player: YoutubePlayer(
+                              controller: _youtubeController!,
+                              showVideoProgressIndicator: true,
+                              progressIndicatorColor: accentColor,
+                            ),
+                            builder: (context, player) => player,
                           ),
                         ),
                       ],
                     )
+                  else if (_isVideoLoading)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: CircularProgressIndicator(
+                          color: AppColors.orange,
+                        ),
+                      ),
+                    )
                   else
                     Container(
-                      height: 100,
-                      alignment: Alignment.center,
-                      child: Text(
-                        'No tutorial video available',
-                        style: TextStyle(color: Colors.grey[500]),
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 28),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: cardBorder),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.videocam_off_outlined,
+                            color: AppColors.muted,
+                            size: 34,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'No tutorial video available',
+                            style: text.bodySmall,
+                          ),
+                        ],
                       ),
                     ),
                 ],
@@ -356,8 +453,12 @@ class _RecipeDetailState extends State<RecipeDetail>
           : FloatingActionButton.extended(
               onPressed: _saveRecipe,
               backgroundColor: accentColor,
-              icon: const Icon(Icons.save),
-              label: const Text("Save Recipe"),
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.bookmark_add_rounded),
+              label: const Text(
+                "Save Recipe",
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
             ),
     );
   }

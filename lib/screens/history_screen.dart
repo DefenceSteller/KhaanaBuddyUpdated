@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:khaanabuddy/services/firestore_service.dart';
+import 'package:khaanabuddy/themes/theme.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -12,26 +13,28 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-
   final String userId = FirebaseAuth.instance.currentUser?.uid ?? "guest";
   final FirestoreService _firestoreService = FirestoreService();
 
   /// ✅ STEP 3 — Show recipe details popup and handle deletion
   void _showRecipePopup(
       BuildContext context, Map<String, dynamic> data, String docId) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final text = Theme.of(context).textTheme;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
         ),
         title: Text(
           data["title"] ?? "Recipe",
           style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFFF7A1A),
-            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: AppColors.orange,
+            fontSize: 20,
           ),
         ),
         content: SingleChildScrollView(
@@ -40,11 +43,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             children: [
               Text(
                 data["fullText"] ?? "No recipe details available.",
-                style: const TextStyle(
-                  fontSize: 16,
-                  height: 1.5,
-                  color: Colors.black87,
-                ),
+                style: text.bodyMedium?.copyWith(height: 1.55),
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
@@ -65,11 +64,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 icon: const Icon(Icons.delete_forever),
                 label: const Text("Delete Recipe"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
+                  backgroundColor: const Color(0xFFEF4444),
                   foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 45),
+                  minimumSize: const Size(double.infinity, 48),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
@@ -79,8 +78,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child:
-                const Text("Close", style: TextStyle(color: Color(0xFFFF7A1A))),
+            child: const Text("Close"),
           ),
         ],
       ),
@@ -90,12 +88,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
   /// ✅ STEP 3 — UI for showing history list
   @override
   Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Recipe History"),
-        backgroundColor: const Color(0xFFFF7A1A),
-        foregroundColor: Colors.white,
-        elevation: 2,
+        title: const Text(
+          "Recipe History",
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _firestoreService.getRecipes(userId, false),
@@ -105,19 +107,40 @@ class _HistoryScreenState extends State<HistoryScreen> {
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-
             return const Center(
-              child: CircularProgressIndicator(color: Color(0xFFFF7A1A)),
+              child: CircularProgressIndicator(color: AppColors.orange),
             );
           }
 
           final docs = snapshot.data?.docs ?? [];
 
           if (docs.isEmpty) {
-            return const Center(
-              child: Text(
-                "No recipes found yet 🍳",
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+            // Empty state
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 92,
+                    height: 92,
+                    decoration: const BoxDecoration(
+                      color: AppColors.tint,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.bookmark_border_rounded,
+                      color: AppColors.orange,
+                      size: 42,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text("No recipes found yet 🍳", style: text.titleMedium),
+                  const SizedBox(height: 6),
+                  Text(
+                    "Recipes you save will appear here",
+                    style: text.bodySmall,
+                  ),
+                ],
               ),
             );
           }
@@ -129,33 +152,68 @@ class _HistoryScreenState extends State<HistoryScreen> {
               final doc = docs[index];
               final data = doc.data();
 
-              return Card(
-                elevation: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(16),
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.orange.shade100,
-                    child:
-                        const Icon(Icons.restaurant, color: Color(0xFFFF7A1A)),
-                  ),
-                  title: Text(
-                    data["title"] ?? "Untitled Recipe",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: Colors.black,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: Material(
+                  color: isDark ? AppColors.darkSurface : AppColors.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () => _showRecipePopup(context, data, doc.id),
+                    child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.darkBorder
+                            : AppColors.border,
+                      ),
+                      boxShadow:
+                          isDark ? const [] : const [AppColors.softShadow],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: AppColors.tint,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: const Icon(
+                            Icons.restaurant_rounded,
+                            color: AppColors.orange,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                data["title"] ?? "Untitled Recipe",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: text.titleSmall,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                data["cuisine"] ?? "Saved recipe",
+                                style: text.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppColors.muted,
+                        ),
+                      ],
                     ),
                   ),
-                  subtitle: Text(
-                    data["cuisine"] ?? "",
-                    style: const TextStyle(color: Colors.black54),
-                  ),
-
-                  onTap: () => _showRecipePopup(context, data, doc.id),
+                ),
                 ),
               );
             },

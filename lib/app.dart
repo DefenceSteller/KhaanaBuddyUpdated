@@ -33,22 +33,9 @@ class AppContent extends StatelessWidget {
       title: 'KhaanaBuddy',
       debugShowCheckedModeBanner: false,
 
-      // ✅ Apply themes from theme.dart
-      theme: lightTheme.copyWith(
-        primaryColor: Colors.deepOrange,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.deepOrange,
-          foregroundColor: Colors.white,
-        ),
-        scaffoldBackgroundColor: Colors.white,
-      ),
-      darkTheme: darkTheme.copyWith(
-        primaryColor: Colors.deepOrange,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.deepOrange,
-          foregroundColor: Colors.white,
-        ),
-      ),
+      // ✅ White & orange design system from theme.dart
+      theme: lightTheme,
+      darkTheme: darkTheme,
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
 
       // ✅ Start with Splash Screen
