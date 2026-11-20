@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:khaanabuddy/screens/history_screen.dart';
 import 'package:khaanabuddy/screens/profile_screen.dart';
 import 'package:khaanabuddy/screens/recipe_detail.dart';
@@ -43,22 +42,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadUserName() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
 
     try {
-      final doc =
-          await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final data = await Supabase.instance.client
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
 
-      if (doc.exists) {
-        final data = doc.data();
-        if (data != null && data.containsKey('name')) {
-          setState(() {
-            userName = data['name'] ?? "User";
-            _loadingName = false;
-          });
-          return;
-        }
+      if (data != null && data['name'] != null) {
+        setState(() {
+          final name = data['name'] as String?;
+          userName = (name == null || name.isEmpty) ? "User" : name;
+          _loadingName = false;
+        });
+        return;
       }
     } catch (e) {
       debugPrint("⚠️ Error loading name: $e");

@@ -1,15 +1,15 @@
 // lib/screens/profile_screen.dart
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../config/supabase_config.dart';
 import '../providers/theme_provider.dart';
+import '../services/recipe_service.dart';
 import '../themes/theme.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -20,8 +20,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final RecipeService _recipeService = RecipeService();
 
   final TextEditingController _nameController = TextEditingController();
 
@@ -33,11 +32,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _voiceEnabled = true;
   bool _busy = false;
 
-  User? get _user => _auth.currentUser;
+  User? get _user => supabase.auth.currentUser;
 
-  bool get _isPasswordUser => _user?.providerData
-          .any((p) => p.providerId == 'password') ??
-      false;
+  bool get _emailVerified => _user?.emailConfirmedAt != null;
+
+  bool get _isPasswordUser {
+    final providers = _user?.appMetadata['providers'];
+    if (providers is List) return providers.contains('email');
+    return false;
+  }
 
   @override
   void initState() {
@@ -55,15 +58,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = _user;
     if (user == null) return;
 
-    _nameController.text = user.displayName ?? '';
-    _photoUrl = user.photoURL;
+    // Fallbacks from auth metadata
+    final metaName =
+        user.userMetadata?['full_name'] ?? user.userMetadata?['name'];
+    if (metaName is String && metaName.isNotEmpty) {
+      _nameController.text = metaName;
+    }
+    final metaPhoto = user.userMetadata?['photo_url'];
+    if (metaPhoto is String) _photoUrl = metaPhoto;
 
     try {
-      final doc = await _firestore.collection('users').doc(user.uid).get();
-      final data = doc.data();
+      final data = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
       if (data != null) {
         if (data['name'] != null) _nameController.text = data['name'];
-        if (data['photoUrl'] != null) _photoUrl = data['photoUrl'];
+        if (data['photo_url'] != null) _photoUrl = data['photo_url'];
       }
     } catch (e) {
       debugPrint('Error loading profile: $e');
@@ -77,13 +89,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (user == null) return;
 
     try {
-      final base = _firestore.collection('users').doc(user.uid);
-      final saved = await base.collection('history').count().get();
-      final favs = await base.collection('favorites').count().get();
+      final saved = await _recipeService.countRecipes(user.id);
+      final favs =
+          await _recipeService.countRecipes(user.id, isFavorite: true);
       if (mounted) {
         setState(() {
-          _savedCount = saved.count ?? 0;
-          _favoriteCount = favs.count ?? 0;
+          _savedCount = saved;
+          _favoriteCount = favs;
           _statsLoading = false;
         });
       }
@@ -103,7 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // ──────────────────────────────────────────────────────────────
-  // Profile photo (image_picker → Firebase Storage → Firestore)
+  // Profile photo (image_picker → Supabase Storage → profiles table)
   // ──────────────────────────────────────────────────────────────
 
   Future<void> _changePhoto() async {
@@ -120,17 +132,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       setState(() => _isUploadingPhoto = true);
 
-      final ref =
-          FirebaseStorage.instance.ref().child('users/${user.uid}/profile.jpg');
-      await ref.putFile(File(picked.path));
-      final url = await ref.getDownloadURL();
+      // Unique path avoids stale CDN-cached public URLs.
+      final ext = picked.path.contains('.')
+          ? picked.path.split('.').last.toLowerCase()
+          : 'jpg';
+      final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
+      final path =
+          '${user.id}/avatar_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
-      await _firestore.collection('users').doc(user.uid).set(
-        {'photoUrl': url},
-        SetOptions(merge: true),
-      );
+      await supabase.storage.from('avatars').upload(
+            path,
+            File(picked.path),
+            fileOptions: FileOptions(
+              contentType: contentType,
+              upsert: true,
+            ),
+          );
+      final url = supabase.storage.from('avatars').getPublicUrl(path);
+
+      await supabase.from('profiles').upsert({
+        'id': user.id,
+        'photo_url': url,
+      });
       try {
-        await user.updatePhotoURL(url);
+        await supabase.auth
+            .updateUser(UserAttributes(data: {'photo_url': url}));
       } catch (_) {}
 
       if (mounted) {
@@ -218,14 +244,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (user == null) return;
 
     try {
-      await _firestore.collection('users').doc(user.uid).set(
-        {'name': name},
-        SetOptions(merge: true),
-      );
+      await supabase.from('profiles').upsert({
+        'id': user.id,
+        'name': name,
+        'email': user.email,
+      });
       try {
-        await user.updateDisplayName(name);
+        await supabase.auth
+            .updateUser(UserAttributes(data: {'full_name': name}));
       } catch (e) {
-        debugPrint('Non-fatal: updateDisplayName failed: $e');
+        debugPrint('Non-fatal: updateUser metadata failed: $e');
       }
 
       if (mounted) {
@@ -245,13 +273,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = _user;
     if (user == null) return;
 
-    if (user.emailVerified) {
+    if (user.emailConfirmedAt != null) {
       _showSnack('Your email is verified ✓', Colors.green);
       return;
     }
 
     try {
-      await user.sendEmailVerification();
+      await supabase.auth.resend(type: OtpType.email, email: user.email);
       _showSnack('Verification email sent to ${user.email}', Colors.green);
     } catch (e) {
       _showSnack('Couldn\'t send verification email: $e', Colors.red);
@@ -366,28 +394,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() => _busy = true);
     try {
-      final cred = EmailAuthProvider.credential(
+      // Supabase requires a fresh sign-in (re-auth) before changing
+      // the password — verify the current one first.
+      await supabase.auth.signInWithPassword(
         email: user.email!,
         password: current.text,
       );
-      await user.reauthenticateWithCredential(cred);
-      await user.updatePassword(fresh.text);
+      await supabase.auth.updateUser(UserAttributes(password: fresh.text));
       if (mounted) _showSnack('Password changed successfully 🔑', Colors.green);
-    } on FirebaseAuthException catch (e) {
-      String msg = 'Couldn\'t change password';
-      switch (e.code) {
-        case 'wrong-password':
-        case 'invalid-credential':
-          msg = 'Current password is incorrect';
-          break;
-        case 'weak-password':
-          msg = 'New password is too weak';
-          break;
-        case 'requires-recent-login':
-          msg = 'Please log out, log back in, then try again';
-          break;
-        default:
-          msg = e.message ?? msg;
+    } on AuthException catch (e) {
+      final message = e.message.toLowerCase();
+      String msg;
+      if (message.contains('invalid login credentials')) {
+        msg = 'Current password is incorrect';
+      } else if (message.contains('password')) {
+        msg = 'New password is too weak - use at least 6 characters';
+      } else if (message.contains('recent') ||
+          message.contains('session') ||
+          message.contains('same password')) {
+        msg = 'Please log out, log back in, then try again';
+      } else {
+        msg = e.message;
       }
       if (mounted) _showSnack(msg, Colors.red);
     } catch (e) {
@@ -416,7 +443,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (go != true || !mounted) return;
 
     try {
-      await _auth.signOut();
+      await supabase.auth.signOut();
     } catch (_) {}
     if (!mounted) return;
     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
@@ -447,22 +474,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() => _busy = true);
     try {
-      await user.delete();
-
-      // Best-effort cleanup of the Firestore profile doc.
-      try {
-        await _firestore.collection('users').doc(user.uid).delete();
-      } catch (_) {}
+      // Deletes the auth user; profiles + recipes cascade via FK.
+      await supabase.rpc('delete_my_account');
 
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       }
-    } on FirebaseAuthException catch (e) {
+    } on PostgrestException catch (e) {
+      String msg = 'Couldn\'t delete account: ${e.message}';
+      if (mounted) _showSnack(msg, Colors.red);
+    } on AuthException catch (e) {
       String msg = 'Couldn\'t delete account';
-      if (e.code == 'requires-recent-login') {
-        msg = 'For security, please log out, log back in, then delete your account.';
+      if (e.message.toLowerCase().contains('recent') ||
+          e.message.toLowerCase().contains('session')) {
+        msg =
+            'For security, please log out, log back in, then delete your account.';
       } else {
-        msg = e.message ?? msg;
+        msg = e.message;
       }
       if (mounted) _showSnack(msg, Colors.red);
     } catch (e) {
@@ -629,7 +657,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ──────────────────────────────────────────────────────────────
 
   String _joinedLabel() {
-    final t = _user?.metadata.creationTime;
+    // Supabase stores createdAt as an ISO-8601 string.
+    final dynamic raw = _user?.createdAt;
+    DateTime? t;
+    if (raw is String) {
+      t = DateTime.tryParse(raw);
+    } else if (raw is DateTime) {
+      t = raw;
+    }
     if (t == null) return '—';
     const months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -814,7 +849,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: _user?.emailVerified == true
+                                color: _emailVerified
                                     ? const Color(0x33FFFFFF)
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
@@ -823,23 +858,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    _user?.emailVerified == true
+                                    _emailVerified
                                         ? Icons.verified_rounded
                                         : Icons.error_outline_rounded,
                                     size: 13,
-                                    color: _user?.emailVerified == true
+                                    color: _emailVerified
                                         ? Colors.white
                                         : AppColors.orangeDeep,
                                   ),
                                   const SizedBox(width: 5),
                                   Text(
-                                    _user?.emailVerified == true
+                                    _emailVerified
                                         ? 'Verified'
                                         : 'Verify email',
                                     style: TextStyle(
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w700,
-                                      color: _user?.emailVerified == true
+                                      color: _emailVerified
                                           ? Colors.white
                                           : AppColors.orangeDeep,
                                     ),
@@ -912,7 +947,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       iconBg: iconBg,
                       title: 'Email address',
                       subtitle: _user?.email ?? '',
-                      trailing: _user?.emailVerified == true
+                      trailing: _emailVerified
                           ? const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [

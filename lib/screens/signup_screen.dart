@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
+import '../config/supabase_config.dart';
 import '../themes/theme.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -218,35 +219,49 @@ class _SignupScreenState extends State<SignupScreen> {
 
       if (user != null) {
         print('✅ Signup successful for: ${user.email}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Signup successful!"),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pushReplacementNamed(context, '/home');
+
+        // With email confirmation enabled, Supabase returns no session
+        // until the user clicks the link in their inbox.
+        if (supabase.auth.currentSession != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Signup successful!"),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Almost there! Check your email to confirm your account, then log in.",
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       } else {
         _showError("Signup failed - please try again");
       }
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       if (!mounted) return;
 
       String errorMessage = "Signup failed";
-      switch (e.code) {
-        case 'email-already-in-use':
-          errorMessage = "This email is already registered";
-          break;
-        case 'invalid-email':
-          errorMessage = "Please enter a valid email address";
-          break;
-        case 'operation-not-allowed':
-          errorMessage = "Email/password accounts are not enabled";
-          break;
-        case 'weak-password':
-          errorMessage = "Password is too weak";
-          break;
-        default:
-          errorMessage = "Signup failed: ${e.message}";
+      final message = e.message.toLowerCase();
+      if (message.contains('already registered') ||
+          message.contains('already been registered') ||
+          message.contains('user already exists')) {
+        errorMessage = "This email is already registered";
+      } else if (message.contains('invalid email')) {
+        errorMessage = "Please enter a valid email address";
+      } else if (message.contains('password')) {
+        errorMessage = "Password is too weak - use at least 6 characters";
+      } else if (message.contains('rate limit') ||
+          message.contains('too many')) {
+        errorMessage = "Too many attempts. Try again later";
+      } else {
+        errorMessage = "Signup failed: ${e.message}";
       }
       _showError(errorMessage);
     } catch (e) {

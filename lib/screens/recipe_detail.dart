@@ -3,10 +3,10 @@ import 'package:khaanabuddy/services/ai_service.dart';
 import 'package:khaanabuddy/voice/voice_service.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:khaanabuddy/services/youtube_service.dart';
+import 'package:khaanabuddy/services/recipe_service.dart';
 import 'package:khaanabuddy/themes/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RecipeDetail extends StatefulWidget {
   final String ingredients;
@@ -131,25 +131,24 @@ class _RecipeDetailState extends State<RecipeDetail>
 
   Future<void> _saveRecipe() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please log in to save recipes")),
+        );
+        return;
+      }
 
       final recipeInfo = _extractRecipeInfo(recipe);
       final title = recipeInfo['dishName'] ?? "Generated Recipe";
 
-      final recipeData = {
-        "title": title,
-        "ingredients": widget.ingredients,
-        "cuisine": widget.cuisine,
-        "fullText": recipe,
-        "timestamp": FieldValue.serverTimestamp(),
-      };
-
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(user.uid)
-          .collection("history")
-          .add(recipeData);
+      await RecipeService().saveRecipe(
+        userId: user.id,
+        title: title,
+        ingredients: widget.ingredients,
+        cuisine: widget.cuisine,
+        fullText: recipe,
+      );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

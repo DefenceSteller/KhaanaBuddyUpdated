@@ -1,81 +1,47 @@
-
 // services/auth_service.dart
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/supabase_config.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  GoTrueClient get _auth => supabase.auth;
 
-  // Sign up with email and password
+  /// Sign up with email and password.
+  /// A profile row is created automatically by the `handle_new_user`
+  /// database trigger (see supabase/schema.sql).
   Future<User?> signUp(String email, String password) async {
-    try {
-      print('📝 AuthService: Creating user with email: $email');
-      UserCredential result = await _auth.createUserWithEmailAndPassword(
-        email: email.trim(),
-        password: password,
-      );
-      
-      // Add delay to ensure user is fully created
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      print('✅ AuthService: User created successfully: ${result.user?.email}');
-      return result.user;
-    } catch (e) {
-      print('❌ AuthService: Signup error: $e');
-      
-      // If it's the specific pigeon error, still return success since user was created
-      if (e.toString().contains('PigeonUserDetails') || e.toString().contains('List<Object?>')) {
-        print('⚠️ Pigeon error detected, but user was likely created successfully');
-        // Try to get the current user
-        await Future.delayed(const Duration(seconds: 1));
-        return _auth.currentUser;
-      }
-      
-      rethrow;
-    }
+    print('📝 AuthService: Creating user with email: $email');
+
+    final response = await _auth.signUp(
+      email: email.trim(),
+      password: password,
+      data: {'full_name': ''},
+    );
+
+    print('✅ AuthService: User signed up: ${response.user?.email}');
+    return response.user;
   }
 
-  // Sign in with email and password
+  /// Sign in with email and password.
   Future<User?> signIn(String email, String password) async {
-    try {
-      print('🔐 AuthService: Signing in user: $email');
-      UserCredential result = await _auth.signInWithEmailAndPassword(
-        email: email.trim(),
-        password: password,
-      );
-      
-      // Add delay to ensure auth state is updated
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      print('✅ AuthService: User signed in successfully: ${result.user?.email}');
-      return result.user;
-    } catch (e) {
-      print('❌ AuthService: Login error: $e');
-      
-      // If it's the specific pigeon error, still return success since login worked
-      if (e.toString().contains('PigeonUserDetails') || e.toString().contains('List<Object?>')) {
-        print('⚠️ Pigeon error detected, but login was likely successful');
-        // Try to get the current user
-        await Future.delayed(const Duration(seconds: 1));
-        return _auth.currentUser;
-      }
-      
-      rethrow;
-    }
+    print('🔐 AuthService: Signing in user: $email');
+
+    final response = await _auth.signInWithPassword(
+      email: email.trim(),
+      password: password,
+    );
+
+    print('✅ AuthService: User signed in: ${response.user?.email}');
+    return response.user;
   }
 
-  // Sign out
+  /// Sign out of Supabase.
   Future<void> signOut() async {
     await _auth.signOut();
   }
 
+  /// Get current user.
+  User? getCurrentUser() => _auth.currentUser;
 
-  // Get current user
-  User? getCurrentUser() {
-    return _auth.currentUser;
-  }
-
-  // Check if user is logged in
-  bool isUserLoggedIn() {
-    return _auth.currentUser != null;
-  }
+  /// Check if user is logged in.
+  bool isUserLoggedIn() => _auth.currentSession != null;
 }

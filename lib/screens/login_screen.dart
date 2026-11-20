@@ -1,8 +1,9 @@
 // lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 import '../services/google_auth_service.dart';
+import '../config/supabase_config.dart';
 import '../themes/theme.dart';
 import 'home_screen.dart';
 
@@ -20,6 +21,23 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   final AuthService _authService = AuthService();
   final GoogleAuthService _googleAuthService = GoogleAuthService();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ✅ If Google OAuth redirected back and a session already exists
+    // (even after an app relaunch), skip the login screen.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (supabase.auth.currentSession != null) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -263,8 +281,8 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         _showError("Login failed - please try again");
       }
-    } on FirebaseAuthException catch (e) {
-      _handleFirebaseError(e);
+    } on AuthException catch (e) {
+      _handleAuthError(e);
     } catch (e) {
       _showError("An unexpected error occurred: $e");
     } finally {
@@ -272,12 +290,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Google Sign-In
+  // Google Sign-In (via Supabase OAuth)
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
     try {
-      final user = await _googleAuthService.signInWithGoogle();
-      if (user != null) {
+      final success = await _googleAuthService.signInWithGoogle();
+      if (!mounted) return;
+
+      if (success && supabase.auth.currentSession != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Signed in with Google!"),
@@ -289,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
           (route) => false,
         );
       } else {
-        _showError("Google Sign-In failed");
+        _showError("Google Sign-In was cancelled or timed out");
       }
     } catch (e) {
       _showError("Error signing in with Google: $e");
@@ -298,26 +318,23 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _handleFirebaseError(FirebaseAuthException e) {
+  void _handleAuthError(AuthException e) {
     String errorMessage = "Login failed";
-    switch (e.code) {
-      case 'user-not-found':
-        errorMessage = "No user found with this email";
-        break;
-      case 'wrong-password':
-        errorMessage = "Incorrect password";
-        break;
-      case 'invalid-email':
-        errorMessage = "Please enter a valid email address";
-        break;
-      case 'user-disabled':
-        errorMessage = "This account has been disabled";
-        break;
-      case 'too-many-requests':
-        errorMessage = "Too many attempts. Try again later";
-        break;
-      default:
-        errorMessage = "Login failed: ${e.message}";
+    final message = e.message.toLowerCase();
+
+    if (message.contains('invalid login credentials')) {
+      errorMessage = "Incorrect email or password";
+    } else if (message.contains('email not confirmed')) {
+      errorMessage = "Please confirm your email first";
+    } else if (message.contains('user not found')) {
+      errorMessage = "No account found with this email";
+    } else if (message.contains('rate limit') ||
+        message.contains('too many')) {
+      errorMessage = "Too many attempts. Try again later";
+    } else if (message.contains('network')) {
+      errorMessage = "Network error - check your connection";
+    } else {
+      errorMessage = "Login failed: ${e.message}";
     }
     _showError(errorMessage);
   }

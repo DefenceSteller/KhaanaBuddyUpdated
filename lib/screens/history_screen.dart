@@ -1,8 +1,7 @@
 // lib/screens/history_screen.dart
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:khaanabuddy/services/firestore_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:khaanabuddy/services/recipe_service.dart';
 import 'package:khaanabuddy/themes/theme.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -13,8 +12,9 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  final String userId = FirebaseAuth.instance.currentUser?.uid ?? "guest";
-  final FirestoreService _firestoreService = FirestoreService();
+  final String userId =
+      Supabase.instance.client.auth.currentUser?.id ?? "guest";
+  final RecipeService _recipeService = RecipeService();
 
   /// ✅ STEP 3 — Show recipe details popup and handle deletion
   void _showRecipePopup(
@@ -42,17 +42,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                data["fullText"] ?? "No recipe details available.",
+                data["full_text"] ?? "No recipe details available.",
                 style: text.bodyMedium?.copyWith(height: 1.55),
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () async {
-                  await _firestoreService.deleteRecipe(
-                    userId,
-                    docId,
-                    isFavorite: false,
-                  );
+                  try {
+                    await _recipeService.deleteRecipe(docId);
+                  } catch (e) {
+                    debugPrint('Error deleting recipe: $e');
+                  }
                   if (!mounted) return;
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -99,10 +99,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: _firestoreService.getRecipes(userId, false),
+      body: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: _recipeService.watchRecipes(userId),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
+            debugPrint('History stream error: ${snapshot.error}');
             return const Center(child: Text("Error loading recipes"));
           }
 
@@ -112,7 +113,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             );
           }
 
-          final docs = snapshot.data?.docs ?? [];
+          final docs = snapshot.data ?? [];
 
           if (docs.isEmpty) {
             // Empty state
@@ -149,8 +150,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             padding: const EdgeInsets.all(16),
             itemCount: docs.length,
             itemBuilder: (context, index) {
-              final doc = docs[index];
-              final data = doc.data();
+              final data = docs[index];
+              final docId = (data['id'] ?? '').toString();
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 14),
@@ -159,61 +160,61 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   borderRadius: BorderRadius.circular(20),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(20),
-                    onTap: () => _showRecipePopup(context, data, doc.id),
+                    onTap: () => _showRecipePopup(context, data, docId),
                     child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isDark
-                            ? AppColors.darkBorder
-                            : AppColors.border,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.border,
+                        ),
+                        boxShadow:
+                            isDark ? const [] : const [AppColors.softShadow],
                       ),
-                      boxShadow:
-                          isDark ? const [] : const [AppColors.softShadow],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: AppColors.tint,
-                            borderRadius: BorderRadius.circular(15),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: AppColors.tint,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: const Icon(
+                              Icons.restaurant_rounded,
+                              color: AppColors.orange,
+                              size: 24,
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.restaurant_rounded,
-                            color: AppColors.orange,
-                            size: 24,
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  data["title"] ?? "Untitled Recipe",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: text.titleSmall,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  data["cuisine"] ?? "Saved recipe",
+                                  style: text.bodySmall,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                data["title"] ?? "Untitled Recipe",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: text.titleSmall,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                data["cuisine"] ?? "Saved recipe",
-                                style: text.bodySmall,
-                              ),
-                            ],
+                          const Icon(
+                            Icons.chevron_right_rounded,
+                            color: AppColors.muted,
                           ),
-                        ),
-                        const Icon(
-                          Icons.chevron_right_rounded,
-                          color: AppColors.muted,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
                 ),
               );
             },
