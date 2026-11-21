@@ -1,12 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/ai_config_local.dart';
 
 class AIService {
-  // Replace with your own key from https://platform.openai.com/api-keys
-  static const String apiKey = 'YOUR_OPENAI_API_KEY_HERE';
-  static const String baseUrl = 'https://api.openai.com/v1';
-  static const String model = 'gpt-4o-mini'; // cheapest & fastest (~$0.15/1M tokens)
-
   static Future<String> getRecipe(String ingredients, String cuisine) async {
     // ✅ Step 1: Safety filter for inappropriate or irrelevant inputs
     final bannedWords = [
@@ -106,13 +102,13 @@ Keep tone helpful and concise.
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/chat/completions'),
+        Uri.parse('${AIConfig.baseUrl}/chat/completions'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
+          'Authorization': 'Bearer ${AIConfig.groqApiKey}',
         },
         body: jsonEncode({
-          'model': model,
+          'model': AIConfig.model,
           'messages': [
             {'role': 'user', 'content': prompt},
           ],
@@ -125,7 +121,7 @@ Keep tone helpful and concise.
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         return (data['choices'][0]['message']['content'] as String).trim();
       } else if (response.statusCode == 401) {
-        return '⚠️ AI configuration error — check your OpenAI API key.';
+        return '⚠️ AI configuration error — check your Groq API key.';
       } else if (response.statusCode == 429) {
         return '⚠️ Too many requests — please wait a moment and try again.';
       } else {

@@ -52,3 +52,6 @@ build/
 .flutter-plugins
 .flutter-plugins-dependencies
 **/Flutter/.last_build_id
+
+# AI Config (contains API keys)
+lib/config/ai_config_local.dart
