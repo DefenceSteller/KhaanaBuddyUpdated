@@ -67,8 +67,16 @@ class _RecipeDetailState extends State<RecipeDetail>
       });
 
       final recipeInfo = _extractRecipeInfo(result);
-      String searchQuery =
-          "${recipeInfo['dishName'] ?? ingredients} ${cuisine} recipe";
+      final dishName = (recipeInfo['dishName'] ?? '').trim();
+      final cuisineLabel = cuisine.trim();
+      final queryParts = <String>[
+        if (dishName.isNotEmpty) dishName else ingredients,
+        if (cuisineLabel.isNotEmpty &&
+            cuisineLabel.toLowerCase() != 'default')
+          cuisineLabel,
+        'recipe',
+      ];
+      final searchQuery = queryParts.join(' ');
 
       final videoId = await YoutubeService.getFirstVideoId(searchQuery);
 
