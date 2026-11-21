@@ -33,7 +33,7 @@ class AppContent extends StatelessWidget {
       title: 'KhaanaBuddy',
       debugShowCheckedModeBanner: false,
 
-      // ✅ White & orange design system from theme.dart
+      // ✅ Botanical Kitchen design system (green + cream) from theme.dart
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,

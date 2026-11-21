@@ -50,16 +50,21 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Stack(
           children: [
-            // 🔹 Soft orange glow top-right
+            // 🔹 Soft green glow top-right
             Positioned(
               top: -110,
               right: -80,
-              child: _blob(240, const Color(0x14FF7A1A)),
+              child: _blob(240, const Color(0x1F1E8A5A)),
             ),
             Positioned(
               bottom: -90,
               left: -70,
-              child: _blob(200, const Color(0x0FFF5A00)),
+              child: _blob(200, const Color(0x140F5F3E)),
+            ),
+            Positioned(
+              bottom: 40,
+              right: -50,
+              child: _blob(140, const Color(0x1AF2A93B)),
             ),
 
             SafeArea(
@@ -120,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 28),
 
-                    // Login Button (orange gradient)
+                    // Login Button (green gradient)
                     DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: AppColors.gradient,

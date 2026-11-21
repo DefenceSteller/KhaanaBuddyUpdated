@@ -49,24 +49,27 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: Stack(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(gradient: AppColors.gradient),
+      child: Stack(
         children: [
-          // 🔹 Soft orange blobs
+          // 🔹 Soft light + gold blobs
           Positioned(
             top: -90,
             right: -70,
-            child: _blob(220, const Color(0x1AFF7A1A)),
+            child: _blob(220, const Color(0x26FFFFFF)),
           ),
           Positioned(
             bottom: -100,
             left: -80,
-            child: _blob(260, const Color(0x14FF5A00)),
+            child: _blob(260, const Color(0x1A0A3D28)),
           ),
           Positioned(
             bottom: 120,
             right: -40,
-            child: _blob(120, const Color(0x1AFFA13B)),
+            child: _blob(120, const Color(0x33F2A93B)),
           ),
 
           // 🔹 Center content
@@ -85,7 +88,13 @@ class _SplashScreenState extends State<SplashScreen>
                       decoration: BoxDecoration(
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(38),
-                        boxShadow: const [AppColors.cardShadow],
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x40062E1E),
+                            blurRadius: 40,
+                            offset: Offset(0, 16),
+                          ),
+                        ],
                       ),
                       child: Image.asset(
                         'lib/assets/CookMate_logo.png',
@@ -96,19 +105,28 @@ class _SplashScreenState extends State<SplashScreen>
                     const Text(
                       "KhaanaBuddy",
                       style: TextStyle(
-                        color: AppColors.ink,
-                        fontSize: 32,
+                        fontFamily: 'Fraunces',
+                        color: Colors.white,
+                        fontSize: 34,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
+                        fontVariations: <FontVariation>[
+                          FontVariation('wght', 800),
+                          FontVariation('opsz', 72),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
                       "Your AI Cooking Companion",
                       style: TextStyle(
-                        color: AppColors.muted,
+                        fontFamily: 'Inter',
+                        color: Color(0xE6FFFFFF),
                         fontSize: 15.5,
                         fontWeight: FontWeight.w400,
+                        fontVariations: <FontVariation>[
+                          FontVariation('wght', 400),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -119,8 +137,8 @@ class _SplashScreenState extends State<SplashScreen>
                         borderRadius: BorderRadius.circular(10),
                         child: const LinearProgressIndicator(
                           minHeight: 6,
-                          color: AppColors.orange,
-                          backgroundColor: AppColors.tint,
+                          color: AppColors.accent,
+                          backgroundColor: Color(0x4DFFFFFF),
                         ),
                       ),
                     ),
@@ -130,6 +148,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
         ],
+      ),
       ),
     );
   }

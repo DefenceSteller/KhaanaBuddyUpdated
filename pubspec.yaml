@@ -40,6 +40,15 @@ flutter:
     - "lib/assets/CookMate_logo.png"
     - "lib/assets/google_logo.png"
 
+  # 🌿 Botanical Kitchen typography — Fraunces (headings) + Inter (body)
+  fonts:
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/Fraunces.ttf
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf
+
 # ✅ Step 3: Add launcher icon configuration
 flutter_launcher_icons:
   android: true

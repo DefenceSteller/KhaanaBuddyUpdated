@@ -34,7 +34,7 @@ class _RecipeDetailState extends State<RecipeDetail>
   late AnimationController _aiAnimationController;
   late Animation<double> _bounceAnimation;
 
-  final Color accentColor = AppColors.orange;
+  final Color accentColor = AppColors.brand;
 
   @override
   void initState() {
@@ -293,7 +293,7 @@ class _RecipeDetailState extends State<RecipeDetail>
                           borderRadius: BorderRadius.circular(10),
                           child: const LinearProgressIndicator(
                             minHeight: 6,
-                            color: AppColors.orange,
+                            color: AppColors.brand,
                             backgroundColor: AppColors.tint,
                           ),
                         ),
@@ -327,14 +327,14 @@ class _RecipeDetailState extends State<RecipeDetail>
                             children: [
                               const Icon(
                                 Icons.smart_toy_rounded,
-                                color: AppColors.orange,
+                                color: AppColors.brand,
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 "AI is thinking...",
                                 style: TextStyle(
-                                  color: AppColors.orange,
+                                  color: AppColors.brand,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -385,7 +385,7 @@ class _RecipeDetailState extends State<RecipeDetail>
                               ),
                               child: const Icon(
                                 Icons.play_circle_fill_rounded,
-                                color: AppColors.orange,
+                                color: AppColors.brand,
                                 size: 22,
                               ),
                             ),
@@ -415,7 +415,7 @@ class _RecipeDetailState extends State<RecipeDetail>
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 24),
                         child: CircularProgressIndicator(
-                          color: AppColors.orange,
+                          color: AppColors.brand,
                         ),
                       ),
                     )

@@ -201,7 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           title: const Text(
             'Edit name',
             style: TextStyle(
-              color: AppColors.orange,
+              color: AppColors.brand,
               fontWeight: FontWeight.w800,
               fontSize: 19,
             ),
@@ -297,7 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!_isPasswordUser) {
       _showSnack(
         'You sign in with Google — manage your password in your Google Account.',
-        Colors.orange,
+        AppColors.brandDeep,
       );
       return;
     }
@@ -318,7 +318,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: const Text(
               'Change password',
               style: TextStyle(
-                color: AppColors.orange,
+                color: AppColors.brand,
                 fontWeight: FontWeight.w800,
                 fontSize: 19,
               ),
@@ -526,13 +526,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               borderRadius: BorderRadius.circular(24)),
           title: Row(
             children: [
-              Icon(icon, color: AppColors.orange, size: 22),
+              Icon(icon, color: AppColors.brand, size: 22),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   title,
                   style: const TextStyle(
-                    color: AppColors.orange,
+                    color: AppColors.brand,
                     fontWeight: FontWeight.w800,
                     fontSize: 18,
                   ),
@@ -692,7 +692,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final surfaceColor = isDark ? AppColors.darkSurface : AppColors.surface;
     final borderColor = isDark ? AppColors.darkBorder : AppColors.border;
-    final iconBg = isDark ? const Color(0x2EFF7A1A) : AppColors.tint;
+    final iconBg = isDark ? const Color(0x2E1E8A5A) : AppColors.tint;
 
     final displayName = _nameController.text.isEmpty
         ? 'Add your name'
@@ -752,7 +752,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         const Icon(
                                       Icons.person_rounded,
                                       size: 46,
-                                      color: AppColors.orange,
+                                      color: AppColors.brand,
                                     ),
                                   )
                                 : Container(
@@ -760,7 +760,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     child: const Icon(
                                       Icons.person_rounded,
                                       size: 46,
-                                      color: AppColors.orange,
+                                      color: AppColors.brand,
                                     ),
                                   ),
                           ),
@@ -786,13 +786,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         padding: EdgeInsets.all(7),
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.4,
-                                          color: AppColors.orange,
+                                          color: AppColors.brand,
                                         ),
                                       )
                                     : const Icon(
                                         Icons.camera_alt_rounded,
                                         size: 16,
-                                        color: AppColors.orange,
+                                        color: AppColors.brand,
                                       ),
                               ),
                             ),
@@ -864,7 +864,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     size: 13,
                                     color: _emailVerified
                                         ? Colors.white
-                                        : AppColors.orangeDeep,
+                                        : AppColors.brandDeep,
                                   ),
                                   const SizedBox(width: 5),
                                   Text(
@@ -876,7 +876,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       fontWeight: FontWeight.w700,
                                       color: _emailVerified
                                           ? Colors.white
-                                          : AppColors.orangeDeep,
+                                          : AppColors.brandDeep,
                                     ),
                                   ),
                                 ],
@@ -979,7 +979,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: const Text(
                                 'Verify',
                                 style: TextStyle(
-                                  color: AppColors.orangeDeep,
+                                  color: AppColors.brandDeep,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -1113,7 +1113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       height: 22,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.4,
-                        color: AppColors.orange,
+                        color: AppColors.brand,
                       ),
                     ),
                   ),
@@ -1225,7 +1225,7 @@ class _SettingsTile extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 21,
-                color: iconColor ?? AppColors.orange,
+                color: iconColor ?? AppColors.brand,
               ),
             ),
             const SizedBox(width: 14),

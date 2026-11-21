@@ -147,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? const SizedBox(
                           width: 140,
                           child: LinearProgressIndicator(
-                            color: AppColors.orange,
+                            color: AppColors.brand,
                             backgroundColor: AppColors.tint,
                             minHeight: 6,
                           ),
@@ -220,12 +220,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(
-                        Icons.auto_awesome_rounded,
-                        color: Colors.white,
-                        size: 20,
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: const Color(0x33FFFFFF),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome_rounded,
+                          color: AppColors.accent,
+                          size: 18,
+                        ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Text(
                         "Find Recipes",
                         style: text.titleLarge?.copyWith(
@@ -309,7 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ? FontWeight.w700
                                   : FontWeight.w500,
                               color: selected
-                                  ? AppColors.orangeDeep
+                                  ? AppColors.brandDeep
                                   : const Color(0xF0FFFFFF),
                             ),
                           ),
@@ -326,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: _findRecipes,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        foregroundColor: AppColors.orangeDeep,
+                        foregroundColor: AppColors.brandDeep,
                         elevation: 0,
                         minimumSize: const Size.fromHeight(54),
                         shape: RoundedRectangleBorder(
@@ -420,7 +427,7 @@ class _HeaderButton extends StatelessWidget {
   }
 }
 
-/// White feature card with orange icon chip.
+/// Cream feature card with green icon chip.
 class _FeatureTile extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -465,7 +472,7 @@ class _FeatureTile extends StatelessWidget {
                   color: AppColors.tint,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(icon, color: AppColors.orange, size: 24),
+                child: Icon(icon, color: AppColors.brand, size: 24),
               ),
               const SizedBox(height: 14),
               Text(title, style: text.titleSmall),

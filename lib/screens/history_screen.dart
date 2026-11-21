@@ -33,7 +33,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           data["title"] ?? "Recipe",
           style: const TextStyle(
             fontWeight: FontWeight.w800,
-            color: AppColors.orange,
+            color: AppColors.brand,
             fontSize: 20,
           ),
         ),
@@ -109,7 +109,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: AppColors.orange),
+              child: CircularProgressIndicator(color: AppColors.brand),
             );
           }
 
@@ -130,7 +130,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                     child: const Icon(
                       Icons.bookmark_border_rounded,
-                      color: AppColors.orange,
+                      color: AppColors.brand,
                       size: 42,
                     ),
                   ),
@@ -184,7 +184,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             ),
                             child: const Icon(
                               Icons.restaurant_rounded,
-                              color: AppColors.orange,
+                              color: AppColors.brand,
                               size: 24,
                             ),
                           ),

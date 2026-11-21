@@ -27,16 +27,21 @@ class _SignupScreenState extends State<SignupScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // 🔹 Soft orange glow
+          // 🔹 Soft green glow
           Positioned(
             top: -100,
             left: -70,
-            child: _blob(220, const Color(0x14FF7A1A)),
+            child: _blob(220, const Color(0x1F1E8A5A)),
           ),
           Positioned(
             bottom: -80,
             right: -60,
-            child: _blob(180, const Color(0x0FFF5A00)),
+            child: _blob(180, const Color(0x140F5F3E)),
+          ),
+          Positioned(
+            top: 60,
+            right: -40,
+            child: _blob(120, const Color(0x1AF2A93B)),
           ),
 
           SafeArea(
@@ -114,7 +119,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 28),
 
-                  // Signup Button (orange gradient)
+                  // Signup Button (green gradient)
                   DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: AppColors.gradient,
@@ -236,7 +241,7 @@ class _SignupScreenState extends State<SignupScreen> {
               content: Text(
                 "Almost there! Check your email to confirm your account, then log in.",
               ),
-              backgroundColor: Colors.orange,
+              backgroundColor: AppColors.brand,
             ),
           );
           Navigator.pushReplacementNamed(context, '/login');
