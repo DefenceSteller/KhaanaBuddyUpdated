@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
 
   provider: ^6.1.2
-  google_generative_ai: ^0.4.7
+  # AI provider replaced with OpenAI REST API (no extra SDK needed)
 
   # ✅ Supabase backend (auth + postgres + storage)
   supabase_flutter: ^2.8.0

@@ -1,7 +1,11 @@
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class AIService {
-  static const String apiKey = "AIzaSyDVyZ7YZ6QIswgvTXZNDR2ISbcilBGRRhY";
+  // Replace with your own key from https://platform.openai.com/api-keys
+  static const String apiKey = 'YOUR_OPENAI_API_KEY_HERE';
+  static const String baseUrl = 'https://api.openai.com/v1';
+  static const String model = 'gpt-4o-mini'; // cheapest & fastest (~$0.15/1M tokens)
 
   static Future<String> getRecipe(String ingredients, String cuisine) async {
     // ✅ Step 1: Safety filter for inappropriate or irrelevant inputs
@@ -33,17 +37,12 @@ class AIService {
       return "⚠️ Please enter valid cooking ingredients or cuisine names only.";
     }
 
-    // ✅ If it doesn’t contain any food-like words, block it
+    // ✅ If it doesn't contain any food-like words, block it
     final containsFoodWord =
         foodKeywords.any((word) => combinedInput.contains(word));
     if (!containsFoodWord) {
       return "⚠️ That doesn't sound like a food or ingredient. Please enter real cooking ingredients.";
     }
-
-    final model = GenerativeModel(
-      model: 'gemini-1.5-flash',
-      apiKey: apiKey,
-    );
 
     final bool isSearchQuery =
         cuisine.trim().isEmpty || cuisine.toLowerCase() == "default";
@@ -106,11 +105,32 @@ Keep tone helpful and concise.
 ''';
 
     try {
-      final response = await model.generateContent([
-        Content.text(prompt),
-      ]);
+      final response = await http.post(
+        Uri.parse('$baseUrl/chat/completions'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: jsonEncode({
+          'model': model,
+          'messages': [
+            {'role': 'user', 'content': prompt},
+          ],
+          'max_tokens': 1000,
+          'temperature': 0.7,
+        }),
+      );
 
-      return response.text?.trim() ?? "No recipe generated.";
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return (data['choices'][0]['message']['content'] as String).trim();
+      } else if (response.statusCode == 401) {
+        return '⚠️ AI configuration error — check your OpenAI API key.';
+      } else if (response.statusCode == 429) {
+        return '⚠️ Too many requests — please wait a moment and try again.';
+      } else {
+        return 'Error generating recipe: HTTP ${response.statusCode}';
+      }
     } catch (e) {
       return "Error generating recipe: $e";
     }
