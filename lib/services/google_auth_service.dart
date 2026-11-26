@@ -1,22 +1,30 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_config.dart';
 
 class GoogleAuthService {
   /// ✅ Sign in with Google via Supabase OAuth.
   ///
-  /// Opens the system browser for Google's consent screen, then waits
-  /// (up to 2 minutes) for the deep-link redirect to bring a session
-  /// back into the app.
+  /// Opens Google's consent screen, then waits (up to 2 minutes) for
+  /// the redirect to bring a session back into the app.
   ///
   /// Returns `true` when a session was established, `false` if the
   /// user cancelled or the flow timed out.
   Future<bool> signInWithGoogle() async {
     try {
+      // ✅ Platform-aware redirect:
+      //  - Web: send the OAuth code back to the CURRENT page URL so the
+      //    browser can receive it (?code=...) after Google consent.
+      //  - Native: custom deep-link scheme handled by the app.
+      final String redirectTo = kIsWeb
+          ? Uri.base.toString()
+          : SupabaseConfig.googleRedirectUri;
+
       final launched = await supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: SupabaseConfig.googleRedirectUri,
+        redirectTo: redirectTo,
         authScreenLaunchMode: LaunchMode.externalApplication,
       );
 
