@@ -1,0 +1,70 @@
+═══════════════════════════════════════════════════════════════
+  KHAANABUDDY — SIGNING BACKUP INSTRUCTIONS (read carefully)
+═══════════════════════════════════════════════════════════════
+
+WHY THIS MATTERS
+----------------
+Android only lets you install a NEW version of an app over an OLD one
+if BOTH are signed with the SAME key. Your app's identity lives in
+these two files, located in THIS FOLDER (android/):
+
+  1. khaanabuddy-release.keystore   (the key itself — 2.7 KB)
+  2. key.properties                 (the passwords that open the keystore)
+
+If you lose both, you can NEVER ship an update of KhaanaBuddy to
+existing users — they would have to uninstall and reinstall.
+So: keep your backup copies SAFE. They are your app's ID card.
+
+WHAT'S COMMITTED WHERE
+----------------------
+  • khaanabuddy-release.keystore  → committed to GitHub (safe without passwords)
+  • key.properties                → NOT in GitHub (gitignored — passwords stay private)
+  • This file                     → committed to GitHub (just documentation, no secrets)
+
+So: cloning the repo on a new PC gives you the keystore automatically,
+but you must also copy key.properties from your backup.
+
+SETUP ON A NEW COMPUTER (or after re-cloning the repo)
+-------------------------------------------------------
+  1. Clone / open the KhaanaBuddyUpdated repo.
+  2. Copy your backed-up  key.properties  into  android/key.properties
+  3. Confirm  android/khaanabuddy-release.keystore  is present.
+  4. Build:   flutter build apk --release
+     → the APK signs itself automatically (android/app/build.gradle.kts
+       reads android/key.properties → finds the keystore → signs).
+
+VERIFY A SIGNING KEY WORKS (optional)
+--------------------------------------
+  keytool -list -keystore android/khaanabuddy-release.keystore
+    -storepass <your storePassword>
+  Should list:  "khaanabuddy" alias (PrivateKeyEntry).
+
+RELEASE DETAILS
+---------------
+  • Keystore type : PKCS12
+  • Alias         : khaanabuddy
+  • Algorithm     : RSA 2048-bit
+  • Validity      : 20,000 days (~55 years, from 27 Nov 2026)
+  • Certificate   : CN=KhaanaBuddy, OU=Dev, O=KhaanaBuddy, C=US
+  • SHA-1 fingerprint: 820d780861221fa5e153de3d6e01d2920a2438f1
+
+  (If you ever publish on Google Play, register this SHA-1
+  fingerprint with your Play Console app signing.)
+
+PUBLISHING / UPDATING THE PUBLIC APK
+------------------------------------
+  1. Bump  versionCode  in  android/app/build.gradle.kts
+     (currently: 1 → make it 2 for the next release, etc.)
+  2. flutter build apk --release
+  3. copy build\app\outputs\flutter-apk\app-release.apk  to  site\downloads\khaanabuddy.apk
+  4. cd site  →  npx vercel --yes --name khaanabuddy --prod
+  The public download stays at:  https://khaanabuddy.vercel.app
+
+KEEP YOUR BACKUP OF
+-------------------
+  □ khaanabuddy-release.keystore
+  □ key.properties
+  somewhere safe (USB drive, encrypted personal cloud, password manager
+  notes — NOT in the GitHub repo, NOT in this project folder's git history).
+
+═══════════════════════════════════════════════════════════════
