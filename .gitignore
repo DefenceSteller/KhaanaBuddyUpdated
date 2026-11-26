@@ -56,3 +56,6 @@ build/
 
 # AI Config (contains API keys)
 lib/config/ai_config_local.dart
+
+# Vercel CLI cache
+.vercel/
