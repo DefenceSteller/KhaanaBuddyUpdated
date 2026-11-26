@@ -446,7 +446,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await supabase.auth.signOut();
     } catch (_) {}
     if (!mounted) return;
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
 
   // ──────────────────────────────────────────────────────────────
@@ -478,7 +478,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await supabase.rpc('delete_my_account');
 
       if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       }
     } on PostgrestException catch (e) {
       String msg = 'Couldn\'t delete account: ${e.message}';
