@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:khaanabuddy/screens/login_screen.dart';
+import 'package:khaanabuddy/screens/home_screen.dart';
 import 'package:khaanabuddy/themes/theme.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -29,12 +29,13 @@ class _SplashScreenState extends State<SplashScreen>
       curve: Curves.easeOutBack,
     );
 
-    // 🔹 Navigate to login after 3 seconds
+    // 🔹 Land new users straight on Home — browsing works as a guest,
+    //    login is only asked for when saving a recipe.
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
       }
     });

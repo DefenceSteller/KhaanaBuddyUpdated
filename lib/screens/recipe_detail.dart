@@ -4,6 +4,7 @@ import 'package:khaanabuddy/voice/voice_service.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:khaanabuddy/services/youtube_service.dart';
 import 'package:khaanabuddy/services/recipe_service.dart';
+import 'package:khaanabuddy/screens/login_screen.dart';
 import 'package:khaanabuddy/themes/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -141,9 +142,8 @@ class _RecipeDetailState extends State<RecipeDetail>
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please log in to save recipes")),
-        );
+        // Guest — show the friendly login prompt instead of saving.
+        _showLoginPrompt();
         return;
       }
 
@@ -167,6 +167,105 @@ class _RecipeDetailState extends State<RecipeDetail>
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Error saving recipe: $e")));
     }
+  }
+
+  /// 🍳 Friendly bottom sheet shown when a guest taps "Save Recipe".
+  /// Cool one-liner + a button that takes the user to the login page.
+  void _showLoginPrompt() {
+    final text = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkSurface : AppColors.surface,
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(28)),
+            boxShadow: const [AppColors.cardShadow],
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Drag handle
+                  Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkBorder : AppColors.border,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+
+                  // Gradient badge
+                  Container(
+                    width: 76,
+                    height: 76,
+                    decoration: const BoxDecoration(
+                      gradient: AppColors.gradient,
+                      shape: BoxShape.circle,
+                      boxShadow: [AppColors.glow],
+                    ),
+                    child: const Icon(
+                      Icons.bookmark_add_rounded,
+                      color: Colors.white,
+                      size: 36,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  Text(
+                    "Don't let this one go cold! 🔥",
+                    textAlign: TextAlign.center,
+                    style: text.titleLarge,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Log in to tuck this recipe into your personal "
+                    "cookbook — every delicious find safe in one place, "
+                    "ready whenever hunger strikes.",
+                    textAlign: TextAlign.center,
+                    style: text.bodyMedium?.copyWith(height: 1.55),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Primary → login page
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(sheetContext);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const LoginScreen()),
+                        );
+                      },
+                      icon: const Icon(Icons.login_rounded, size: 20),
+                      label: const Text("Log in to save"),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  TextButton(
+                    onPressed: () => Navigator.pop(sheetContext),
+                    child: const Text("Maybe later"),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildCleanRecipeText(String recipeText) {
