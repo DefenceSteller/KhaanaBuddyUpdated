@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/supabase_config.dart';
 import '../providers/theme_provider.dart';
+import '../screens/login_screen.dart';
 import '../services/recipe_service.dart';
 import '../themes/theme.dart';
 
@@ -450,6 +451,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // ──────────────────────────────────────────────────────────────
+  // Login (guests)
+  // ──────────────────────────────────────────────────────────────
+
+  void _goToLogin() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+  }
+
+  // ──────────────────────────────────────────────────────────────
   // Delete account
   // ──────────────────────────────────────────────────────────────
 
@@ -698,6 +710,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ? 'Add your name'
         : _nameController.text;
 
+    // ─── Logged out / guest ──────────────────────────────────────
+    // When signed out, the top-right icon and the bottom
+    // "Log out" option become "Log in" instead.
+    final isGuest = _user == null;
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -706,11 +723,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            tooltip: 'Logout',
-            onPressed: _busy ? null : _confirmLogout,
-          ),
+          if (isGuest)
+            IconButton(
+              icon: const Icon(Icons.login_rounded),
+              tooltip: 'Log in',
+              onPressed: _busy ? null : _goToLogin,
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.logout_rounded),
+              tooltip: 'Logout',
+              onPressed: _busy ? null : _confirmLogout,
+            ),
         ],
       ),
       body: ListView(
@@ -1067,30 +1091,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _SettingsCard(
                   surfaceColor: surfaceColor,
                   borderColor: borderColor,
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.logout_rounded,
-                      iconBg: isDark
-                          ? const Color(0x26EF4444)
-                          : const Color(0x1AEF4444),
-                      iconColor: const Color(0xFFEF4444),
-                      title: 'Log out',
-                      titleColor: const Color(0xFFEF4444),
-                      onTap: _confirmLogout,
-                    ),
-                    Divider(indent: 72, color: borderColor),
-                    _SettingsTile(
-                      icon: Icons.delete_forever_rounded,
-                      iconBg: isDark
-                          ? const Color(0x26EF4444)
-                          : const Color(0x1AEF4444),
-                      iconColor: const Color(0xFFEF4444),
-                      title: 'Delete account',
-                      subtitle: 'Permanently remove your data',
-                      titleColor: const Color(0xFFEF4444),
-                      onTap: _confirmDelete,
-                    ),
-                  ],
+                  children: isGuest
+                      ? [
+                          _SettingsTile(
+                            icon: Icons.login_rounded,
+                            iconBg: isDark
+                                ? const Color(0x26FF7A1A)
+                                : AppColors.tint,
+                            iconColor: AppColors.brand,
+                            title: 'Log in',
+                            subtitle: 'Save recipes to your cookbook',
+                            onTap: _goToLogin,
+                          ),
+                        ]
+                      : [
+                          _SettingsTile(
+                            icon: Icons.logout_rounded,
+                            iconBg: isDark
+                                ? const Color(0x26EF4444)
+                                : const Color(0x1AEF4444),
+                            iconColor: const Color(0xFFEF4444),
+                            title: 'Log out',
+                            titleColor: const Color(0xFFEF4444),
+                            onTap: _confirmLogout,
+                          ),
+                          Divider(indent: 72, color: borderColor),
+                          _SettingsTile(
+                            icon: Icons.delete_forever_rounded,
+                            iconBg: isDark
+                                ? const Color(0x26EF4444)
+                                : const Color(0x1AEF4444),
+                            iconColor: const Color(0xFFEF4444),
+                            title: 'Delete account',
+                            subtitle: 'Permanently remove your data',
+                            titleColor: const Color(0xFFEF4444),
+                            onTap: _confirmDelete,
+                          ),
+                        ],
                 ),
                 const SizedBox(height: 24),
 
