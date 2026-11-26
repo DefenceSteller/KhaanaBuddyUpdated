@@ -291,4 +291,4 @@ Personal project — all rights reserved.
 
 ---
 
-**Made with ❤️ using Flutter, Supabase, and Groq AI**
+**Made with Flutter, Supabase, and Groq AI**
