@@ -196,6 +196,13 @@ The app is distributed through a one-page site: **https://khaanabuddy.vercel.app
 - Page source: `site/index.html` (+ `site/assets/`) — committed to this repo
 - APK binary: `site/downloads/khaanabuddy.apk` — **gitignored**, uploaded to Vercel only (never to GitHub)
 
+> ⚠️ **Never reconnect this Vercel project to GitHub.**
+> If the project is linked to the git repo, every push auto-deploys the
+> **repo root** (a Flutter project, not the site) → an empty 404 deployment
+> that steals the `khaanabuddy.vercel.app` production alias. The site only
+> works with **CLI deploys from `site/`** (which upload local files,
+> including the gitignored APK).
+
 ### Updating the public APK
 
 ```bash
