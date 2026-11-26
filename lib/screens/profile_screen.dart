@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -134,21 +135,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() => _isUploadingPhoto = true);
 
       // Unique path avoids stale CDN-cached public URLs.
-      final ext = picked.path.contains('.')
-          ? picked.path.split('.').last.toLowerCase()
+      // On Web the picked "path" is a blob URL (no real disk file), so
+      // derive the extension from the picked file's name instead.
+      final sourceName = kIsWeb ? picked.name : picked.path;
+      final ext = sourceName.contains('.')
+          ? sourceName.split('.').last.toLowerCase()
           : 'jpg';
       final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
       final path =
           '${user.id}/avatar_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
-      await supabase.storage.from('avatars').upload(
-            path,
-            File(picked.path),
-            fileOptions: FileOptions(
-              contentType: contentType,
-              upsert: true,
-            ),
-          );
+      if (kIsWeb) {
+        // Browsers cannot use dart:io File (no disk access), so upload the
+        // picked bytes directly.
+        final bytes = await picked.readAsBytes();
+        await supabase.storage.from('avatars').uploadBinary(
+              path,
+              bytes,
+              fileOptions: FileOptions(
+                contentType: contentType,
+                upsert: true,
+              ),
+            );
+      } else {
+        await supabase.storage.from('avatars').upload(
+              path,
+              File(picked.path),
+              fileOptions: FileOptions(
+                contentType: contentType,
+                upsert: true,
+              ),
+            );
+      }
       final url = supabase.storage.from('avatars').getPublicUrl(path);
 
       await supabase.from('profiles').upsert({
