@@ -98,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ],
                       ),
                       child: Image.asset(
-                        'lib/assets/CookMate_logo.png',
+                        'lib/assets/khaanabuddy_logo_full.png',
                         fit: BoxFit.contain,
                       ),
                     ),
