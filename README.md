@@ -177,10 +177,44 @@ flutter run -d <emulator-id>
 ### Build APK
 
 ```bash
-flutter build apk
+flutter build apk --release
 ```
 
 The APK is output to `build/app/outputs/flutter-apk/app-release.apk`.
+
+**Release signing (required):**
+- Keystore: `android/khaanabuddy-release.keystore` (committed to this repo — safe without passwords)
+- Passwords: `android/key.properties` (gitignored — **back it up securely, it's needed for every future update** of the same app)
+- Signing config: `android/app/build.gradle.kts` → `signingConfigs { create("release") ... }`
+
+---
+
+## 📤 Public Download Site (Vercel)
+
+The app is distributed through a one-page site: **https://khaanabuddy.vercel.app**
+
+- Page source: `site/index.html` (+ `site/assets/`) — committed to this repo
+- APK binary: `site/downloads/khaanabuddy.apk` — **gitignored**, uploaded to Vercel only (never to GitHub)
+
+### Updating the public APK
+
+```bash
+# 1. Build
+flutter build apk --release
+
+# 2. Copy it into the site folder
+copy build\app\outputs\flutter-apk\app-release.apk site\downloads\khaanabuddy.apk
+
+# 3. Re-deploy (from inside site/)
+cd site
+npx vercel --yes --name khaanabuddy --prod
+```
+
+The same URLs stay valid after each re-deploy:
+- Site: `https://khaanabuddy.vercel.app`
+- Direct APK: `https://khaanabuddy.vercel.app/downloads/khaanabuddy.apk`
+
+> Note: bump `versionCode` in `android/app/build.gradle.kts` before each new APK so Android treats it as an update.
 
 ---
 

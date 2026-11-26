@@ -4,6 +4,7 @@
 **/android/**/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 **/android/**/flutter_build.log
+**/android/key.properties
 
 # iOS
 **/ios/**/build/

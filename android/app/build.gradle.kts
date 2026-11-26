@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -21,10 +23,23 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    signingConfigs {
+        create("release") {
+            // ✅ Release signing via android/key.properties (gitignored).
+            //    storeFile/khaanabuddy-release.keystore lives in android/.
+            val props = Properties()
+            val propFile = rootProject.file("key.properties")
+            if (propFile.exists()) propFile.inputStream().use { props.load(it) }
+            storeFile = rootProject.file(props.getProperty("storeFile", "khaanabuddy-release.keystore"))
+            storePassword = props.getProperty("storePassword", "")
+            keyAlias = props.getProperty("keyAlias", "khaanabuddy")
+            keyPassword = props.getProperty("keyPassword", "")
+        }
+    }
+
     buildTypes {
         getByName("release") {
-            // ✅ Use existing debug config instead of re-creating it
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             isShrinkResources = false
         }

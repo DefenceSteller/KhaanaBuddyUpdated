@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KhaanaBuddy — Your AI Cooking Companion</title>
+  <meta name="description" content="Download KhaanaBuddy — your free AI cooking companion. Generate recipes from your pantry, save favorites, and listen with voice. Android APK." />
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --brand: #ff7a1a;
+      --deep: #ff5a00;
+      --soft: #ffa64d;
+      --accent: #f2a93b;
+      --ink: #2a241f;
+      --muted: #8a817c;
+      --tint: #fff1e6;
+      --white: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      background: var(--white);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-display { font-family: "Fraunces", Georgia, serif; }
+
+    /* ── Hero ─────────────────────────────────────── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      color: var(--white);
+      background: linear-gradient(135deg, var(--deep) 0%, var(--brand) 45%, var(--accent) 100%);
+      padding: 72px 24px 96px;
+      text-align: center;
+    }
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(6px);
+    }
+    .hero::before {
+      width: 320px; height: 320px;
+      background: rgba(255, 255, 255, 0.14);
+      top: -120px; right: -80px;
+    }
+    .hero::after {
+      width: 260px; height: 260px;
+      background: rgba(242, 169, 59, 0.35);
+      bottom: -100px; left: -60px;
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-bottom: 28px;
+    }
+    .logo-card {
+      width: 132px; height: 132px;
+      margin: 0 auto 24px;
+      display: grid;
+      place-items: center;
+      background: var(--white);
+      border-radius: 34px;
+      box-shadow: 0 20px 44px rgba(46, 20, 8, 0.28);
+    }
+    .logo-card img { width: 96px; height: 96px; object-fit: contain; }
+    .hero h1 {
+      font-size: clamp(40px, 8vw, 64px);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      line-height: 1.05;
+    }
+    .hero p.tagline {
+      font-size: clamp(17px, 3.5vw, 21px);
+      color: rgba(255, 255, 255, 0.92);
+      margin: 14px auto 34px;
+      max-width: 520px;
+      font-weight: 400;
+    }
+
+    /* ── Buttons ──────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 17px;
+      padding: 16px 30px;
+      border-radius: 16px;
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: var(--white);
+      color: var(--brand);
+      box-shadow: 0 14px 30px rgba(46, 20, 8, 0.28);
+    }
+    .btn-primary:hover { box-shadow: 0 18px 38px rgba(46, 20, 8, 0.34); }
+    .btn svg { width: 22px; height: 22px; }
+
+    /* ── Features ─────────────────────────────────── */
+    .features {
+      max-width: 1080px;
+      margin: -48px auto 0;
+      padding: 0 24px;
+      position: relative;
+      z-index: 2;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid #f3ece5;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 26px rgba(46, 20, 8, 0.06);
+    }
+    .card .ico {
+      width: 46px; height: 46px;
+      border-radius: 13px;
+      display: grid; place-items: center;
+      background: var(--tint);
+      color: var(--brand);
+      font-size: 22px;
+      margin-bottom: 14px;
+    }
+    .card h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .card p { font-size: 14.5px; color: var(--muted); }
+
+    /* ── How to install ───────────────────────────── */
+    .section { max-width: 860px; margin: 0 auto; padding: 72px 24px; }
+    .section h2 {
+      font-size: 30px; font-weight: 800; margin-bottom: 8px;
+    }
+    .section .lead { color: var(--muted); margin-bottom: 30px; font-size: 16px; }
+    .steps { counter-reset: step; display: grid; gap: 14px; }
+    .step {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: var(--tint);
+      border: 1px solid #f6e4d3;
+      border-radius: 16px;
+      padding: 18px 20px;
+    }
+    .step .num {
+      flex: 0 0 auto;
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      display: grid; place-items: center;
+      background: var(--brand);
+      color: #fff; font-weight: 800; font-size: 16px;
+    }
+    .step b { display: block; font-size: 15.5px; margin-bottom: 2px; }
+    .step span { font-size: 14.5px; color: #6f665e; }
+    .note {
+      margin-top: 22px;
+      font-size: 13.5px;
+      color: var(--muted);
+      background: #fff8f1;
+      border: 1px dashed #f0d9c2;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    /* ── CTA band ─────────────────────────────────── */
+    .cta-band {
+      max-width: 1080px;
+      margin: 0 auto 0;
+      padding: 0 24px;
+    }
+    .cta-inner {
+      background: linear-gradient(135deg, var(--deep), var(--brand) 60%, var(--accent));
+      border-radius: 28px;
+      padding: 46px 34px;
+      text-align: center;
+      color: #fff;
+    }
+    .cta-inner h2 { font-size: 30px; font-weight: 800; margin-bottom: 10px; }
+    .cta-inner p { color: rgba(255,255,255,0.9); margin-bottom: 26px; }
+
+    footer {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+    footer b { color: var(--ink); }
+    @media (max-width: 560px) {
+      .hero { padding: 56px 18px 84px; }
+      .section { padding: 56px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <header class="hero">
+    <span class="badge">🍳 Free • Android • No ads</span>
+    <div class="logo-card">
+      <img src="assets/logo.png" alt="KhaanaBuddy logo" />
+    </div>
+    <h1 class="font-display">KhaanaBuddy</h1>
+    <p class="tagline">Your AI cooking companion. Tell it what's in your kitchen and get fresh, detailed recipes — ready in seconds.</p>
+
+    <a class="btn btn-primary" href="downloads/khaanabuddy.apk" download="KhaanaBuddy.apk">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" />
+      </svg>
+      Download APK
+    </a>
+    <p style="margin-top:16px;font-size:13px;color:rgba(255,255,255,0.75)">v1.0.0 &nbsp;•&nbsp; 60 MB &nbsp;•&nbsp; Android 8.0+</p>
+  </header>
+
+  <!-- ═══════════════ FEATURES ═══════════════ -->
+  <section class="features">
+    <div class="grid">
+      <div class="card">
+        <div class="ico">🤖</div>
+        <h3>AI Recipe Generation</h3>
+        <p>Describe your ingredients and get creative, step-by-step recipes generated by AI.</p>
+      </div>
+      <div class="card">
+        <div class="ico">❤️</div>
+        <h3>Your Cookbook</h3>
+        <p>Save recipes and favorites so you can find them again, organized in one place.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🎧</div>
+        <h3>Voice Assistant</h3>
+        <p>Have recipes read aloud step by step while your hands are busy in the kitchen.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🔑</div>
+        <h3>Sign in with Google</h3>
+        <p>Sync your cookbook across devices with a secure one-tap Google login.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ HOW TO INSTALL ═══════════════ -->
+  <section class="section" id="install">
+    <h2 class="font-display">Install on your phone</h2>
+    <p class="lead">KhaanaBuddy is a direct APK download — here's how to get it running in under a minute.</p>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div><b>Download the APK</b><span>Tap the "Download APK" button above. It saves to your Downloads folder.</span></div></div>
+      <div class="step"><div class="num">2</div><div><b>Allow unknown apps</b><span>Android will ask permission. Go to Settings → Security → "Install unknown apps" and allow your browser (Chrome, etc.).</span></div></div>
+      <div class="step"><div class="num">3</div><div><b>Open the file</b><span>Open Downloads, tap <b>KhaanaBuddy.apk</b> and hit "Install".</span></div></div>
+      <div class="step"><div class="num">4</div><div><b>Lance it 🚀</b><span>Tap "Open", sign in with Google, and start cooking.</span></div></div>
+    </div>
+    <p class="note">⚠️ Your phone may show a Play Protect or "unknown source" warning — that's normal for direct APK installs. The app is safe; just confirm to continue. On some Android 14+ phones, if the install is blocked from the browser, open the APK from your Files app instead.</p>
+  </section>
+
+  <!-- ═══════════════ CTA BAND ═══════════════ -->
+  <section class="cta-band">
+    <div class="cta-inner">
+      <h2 class="font-display">Ready to cook with AI?</h2>
+      <p>Grab the app and turn your pantry into dinner plans in seconds.</p>
+      <a class="btn btn-primary" href="downloads/khaanabuddy.apk" download="KhaanaBuddy.apk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" />
+        </svg>
+        Download KhaanaBuddy
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>KhaanaBuddy</b> · Your AI Cooking Companion</p>
+    <p style="margin-top:6px">© 2026 · Made with ❤️ using Flutter, Supabase &amp; Groq AI</p>
+  </footer>
+</body>
+</html>

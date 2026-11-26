@@ -1,0 +1,5 @@
+# Re-include the APK for the Vercel deploy (the root .gitignore excludes *.apk).
+# This keeps the binary out of GitHub but lets Vercel host it.
+!downloads/*.apk
+
+.vercel
