@@ -31,12 +31,12 @@ class _SignupScreenState extends State<SignupScreen> {
           Positioned(
             top: -100,
             left: -70,
-            child: _blob(220, const Color(0x1F1E8A5A)),
+            child: _blob(220, const Color(0x1FFF7A1A)),
           ),
           Positioned(
             bottom: -80,
             right: -60,
-            child: _blob(180, const Color(0x140F5F3E)),
+            child: _blob(180, const Color(0x14FF5A00)),
           ),
           Positioned(
             top: 60,
@@ -231,7 +231,7 @@ class _SignupScreenState extends State<SignupScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("Signup successful!"),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.brand,
             ),
           );
           Navigator.pushReplacementNamed(context, '/home');

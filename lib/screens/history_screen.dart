@@ -532,8 +532,8 @@ class _CuisineChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark
-              ? const Color(0x3356C79A)
-              : const Color(0x331E8A5A),
+              ? const Color(0x33FFA64D)
+              : const Color(0x33FF7A1A),
         ),
       ),
       child: Text(
@@ -597,7 +597,7 @@ class _RecipeCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: const [
                       BoxShadow(
-                        color: Color(0x331E8A5A),
+                        color: Color(0x33FF7A1A),
                         blurRadius: 14,
                         offset: Offset(0, 6),
                       ),

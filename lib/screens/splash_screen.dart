@@ -64,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen>
           Positioned(
             bottom: -100,
             left: -80,
-            child: _blob(260, const Color(0x1A0A3D28)),
+            child: _blob(260, const Color(0x1A3D280A)),
           ),
           Positioned(
             bottom: 120,
@@ -90,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen>
                         borderRadius: BorderRadius.circular(38),
                         boxShadow: const [
                           BoxShadow(
-                            color: Color(0x40062E1E),
+                            color: Color(0x402E1408),
                             blurRadius: 40,
                             offset: Offset(0, 16),
                           ),

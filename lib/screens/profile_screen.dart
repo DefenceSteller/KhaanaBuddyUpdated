@@ -161,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (mounted) {
         setState(() => _photoUrl = url);
-        _showSnack('Profile photo updated ✅', Colors.green);
+        _showSnack('Profile photo updated ✅', AppColors.brand);
       }
     } catch (e) {
       if (mounted) _showSnack('Couldn\'t upload photo: $e', Colors.red);
@@ -258,7 +258,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (mounted) {
         setState(() => _nameController.text = name);
-        _showSnack('Name updated ✅', Colors.green);
+        _showSnack('Name updated ✅', AppColors.brand);
       }
     } catch (e) {
       if (mounted) _showSnack('Error saving name: $e', Colors.red);
@@ -274,13 +274,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (user == null) return;
 
     if (user.emailConfirmedAt != null) {
-      _showSnack('Your email is verified ✓', Colors.green);
+      _showSnack('Your email is verified ✓', AppColors.brand);
       return;
     }
 
     try {
       await supabase.auth.resend(type: OtpType.email, email: user.email);
-      _showSnack('Verification email sent to ${user.email}', Colors.green);
+      _showSnack('Verification email sent to ${user.email}', AppColors.brand);
     } catch (e) {
       _showSnack('Couldn\'t send verification email: $e', Colors.red);
     }
@@ -401,7 +401,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         password: current.text,
       );
       await supabase.auth.updateUser(UserAttributes(password: fresh.text));
-      if (mounted) _showSnack('Password changed successfully 🔑', Colors.green);
+      if (mounted) _showSnack('Password changed successfully 🔑', AppColors.brand);
     } on AuthException catch (e) {
       final message = e.message.toLowerCase();
       String msg;
@@ -692,7 +692,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final surfaceColor = isDark ? AppColors.darkSurface : AppColors.surface;
     final borderColor = isDark ? AppColors.darkBorder : AppColors.border;
-    final iconBg = isDark ? const Color(0x2E1E8A5A) : AppColors.tint;
+    final iconBg = isDark ? const Color(0x2EFF7A1A) : AppColors.tint;
 
     final displayName = _nameController.text.isEmpty
         ? 'Add your name'
@@ -954,13 +954,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Icon(
                                   Icons.check_circle_rounded,
                                   size: 17,
-                                  color: Colors.green,
+                                  color: AppColors.brand,
                                 ),
                                 SizedBox(width: 5),
                                 Text(
                                   'Verified',
                                   style: TextStyle(
-                                    color: Colors.green,
+                                    color: AppColors.brand,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                   ),

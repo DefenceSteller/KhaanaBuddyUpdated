@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-/// 🌿 KhaanaBuddy Design System — "Botanical Kitchen"
-/// Deep basil green + warm cream + saffron gold accent.
+/// 🎨 KhaanaBuddy Design System — "Botanical Kitchen" (orange edition)
+/// Tangerine orange + warm cream + saffron gold accent.
 /// Headings: Fraunces (editorial serif) · Body: Inter.
 class AppColors {
   AppColors._();
 
   // Brand
-  static const Color brand = Color(0xFF1E8A5A); // basil green
-  static const Color brandDeep = Color(0xFF0F5F3E); // forest green
-  static const Color brandSoft = Color(0xFF56C79A); // mint
-  static const Color tint = Color(0xFFE8F4EC); // soft green wash
+  static const Color brand = Color(0xFFFF7A1A); // tangerine orange
+  static const Color brandDeep = Color(0xFFFF5A00); // deep orange
+  static const Color brandSoft = Color(0xFFFFA64D); // soft orange
+  static const Color tint = Color(0xFFFFF1E6); // soft orange wash
 
   // Accent (secondary highlights: AI sparkle, badges)
   static const Color accent = Color(0xFFF2A93B); // saffron gold
@@ -19,44 +19,44 @@ class AppColors {
   // Light palette
   static const Color bg = Color(0xFFFAF7F0); // warm cream
   static const Color surface = Colors.white;
-  static const Color ink = Color(0xFF16231D); // headings
-  static const Color body = Color(0xFF45534C); // body text
-  static const Color muted = Color(0xFF8A968F); // secondary text
-  static const Color border = Color(0xFFE2E7E1); // hairline borders
+  static const Color ink = Color(0xFF231C15); // headings
+  static const Color body = Color(0xFF4B423A); // body text
+  static const Color muted = Color(0xFF94897C); // secondary text
+  static const Color border = Color(0xFFFFE3CE); // hairline borders
 
   // Dark palette
-  static const Color darkBg = Color(0xFF0D1411);
-  static const Color darkSurface = Color(0xFF151E1A);
-  static const Color darkTint = Color(0xFF1D2B24);
-  static const Color darkBorder = Color(0xFF2A3A32);
-  static const Color darkInk = Color(0xFFF4F8F5);
-  static const Color darkBody = Color(0xFFC3D0C9);
-  static const Color darkMuted = Color(0xFF8B998F);
+  static const Color darkBg = Color(0xFF131110);
+  static const Color darkSurface = Color(0xFF1F1B18);
+  static const Color darkTint = Color(0xFF2A241F);
+  static const Color darkBorder = Color(0xFF3A322B);
+  static const Color darkInk = Color(0xFFFFFFFF);
+  static const Color darkBody = Color(0xFFD8D2CB);
+  static const Color darkMuted = Color(0xFF9C948B);
 
-  /// Signature diagonal basil-green gradient.
+  /// Signature diagonal orange gradient.
   static const LinearGradient gradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF0E6E45), Color(0xFF2BA872)],
+    colors: [Color(0xFFFF6A00), Color(0xFFFFA13B)],
   );
 
-  /// Soft green glow for hero elements.
+  /// Soft orange glow for hero elements.
   static const BoxShadow glow = BoxShadow(
-    color: Color(0x4D1E8A5A),
+    color: Color(0x4DFF7A1A),
     blurRadius: 22,
     offset: Offset(0, 10),
   );
 
   /// Subtle card shadow.
   static const BoxShadow cardShadow = BoxShadow(
-    color: Color(0x1A0F5F3E),
+    color: Color(0x1AFF7A1A),
     blurRadius: 24,
     offset: Offset(0, 10),
   );
 
   /// Faint shadow for small inputs / tiles.
   static const BoxShadow softShadow = BoxShadow(
-    color: Color(0x0D0F5F3E),
+    color: Color(0x0DFF7A1A),
     blurRadius: 16,
     offset: Offset(0, 6),
   );
@@ -226,7 +226,7 @@ final ThemeData lightTheme = ThemeData(
   ),
   snackBarTheme: SnackBarThemeData(
     behavior: SnackBarBehavior.floating,
-    backgroundColor: const Color(0xFF17241E),
+    backgroundColor: const Color(0xFF2A241F),
     contentTextStyle: _uiStyle(fontSize: 14.5).copyWith(color: Colors.white),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(14)),

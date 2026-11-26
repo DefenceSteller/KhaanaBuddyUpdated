@@ -54,12 +54,12 @@ class _LoginScreenState extends State<LoginScreen> {
             Positioned(
               top: -110,
               right: -80,
-              child: _blob(240, const Color(0x1F1E8A5A)),
+              child: _blob(240, const Color(0x1FFF7A1A)),
             ),
             Positioned(
               bottom: -90,
               left: -70,
-              child: _blob(200, const Color(0x140F5F3E)),
+              child: _blob(200, const Color(0x14FF5A00)),
             ),
             Positioned(
               bottom: 40,
@@ -276,7 +276,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Login successful!"),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.brand,
           ),
         );
         Navigator.of(context).pushAndRemoveUntil(
@@ -306,7 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Signed in with Google!"),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.brand,
           ),
         );
         Navigator.of(context).pushAndRemoveUntil(
